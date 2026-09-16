@@ -122,13 +122,11 @@ struct FoqosWidgetLiveActivity: Widget {
           expandedIslandStatusView(for: context.state)
         }
       } compactLeading: {
-        foqosLogo(size: compactLogoSize)
-          .frame(width: compactLogoSize, height: compactLogoSize)
+        islandLeadingIcon(for: context.state, size: compactLogoSize)
       } compactTrailing: {
         compactIslandStatusView(for: context.state)
       } minimal: {
-        foqosLogo(size: minimalLogoSize)
-          .frame(width: minimalLogoSize, height: minimalLogoSize)
+        islandLeadingIcon(for: context.state, size: minimalLogoSize)
       }
       .widgetURL(URL(string: "http://www.foqos.app"))
       .keylineTint(Color.purple)
@@ -161,11 +159,36 @@ struct FoqosWidgetLiveActivity: Widget {
     }
   }
 
+  /// A break or pause shows its own sticker in the island, so the clock beside
+  /// it reads as time left in that break.
+  @ViewBuilder
+  private func islandLeadingIcon(
+    for state: FoqosWidgetAttributes.ContentState,
+    size: CGFloat
+  ) -> some View {
+    if state.isPauseActive {
+      stickerStatusView(assetName: "PauseStickerIcon", size: size)
+        .frame(width: size, height: size)
+    } else if state.isBreakActive {
+      stickerStatusView(assetName: "CoffeeStickerIcon", size: size)
+        .frame(width: size, height: size)
+    } else {
+      foqosLogo(size: size)
+        .frame(width: size, height: size)
+    }
+  }
+
   @ViewBuilder
   private func expandedIslandStatusView(
     for state: FoqosWidgetAttributes.ContentState
   ) -> some View {
-    if state.isPauseActive {
+    if let countdownRange = state.countdownRange {
+      islandCountdownText(
+        range: countdownRange,
+        fontSize: expandedTimerFontSize,
+        width: expandedTimerWidth
+      )
+    } else if state.isPauseActive {
       stickerStatusView(assetName: "PauseStickerIcon", size: 30)
         .frame(width: expandedTimerWidth, alignment: .center)
     } else if state.isBreakActive {
@@ -180,7 +203,13 @@ struct FoqosWidgetLiveActivity: Widget {
   private func compactIslandStatusView(
     for state: FoqosWidgetAttributes.ContentState
   ) -> some View {
-    if state.isPauseActive {
+    if let countdownRange = state.countdownRange {
+      islandCountdownText(
+        range: countdownRange,
+        fontSize: compactTimerFontSize,
+        width: compactTimerWidth
+      )
+    } else if state.isPauseActive {
       stickerStatusView(assetName: "PauseStickerIcon", size: 20)
         .frame(width: compactTimerWidth, alignment: .center)
     } else if state.isBreakActive {
@@ -189,6 +218,22 @@ struct FoqosWidgetLiveActivity: Widget {
     } else {
       compactElapsedTimerText(for: state)
     }
+  }
+
+  private func islandCountdownText(
+    range: ClosedRange<Date>,
+    fontSize: CGFloat,
+    width: CGFloat
+  ) -> some View {
+    Text(timerInterval: range, countsDown: true)
+      .font(.system(size: fontSize, weight: .semibold, design: .rounded))
+      .monospacedDigit()
+      .lineLimit(1)
+      .minimumScaleFactor(0.68)
+      .allowsTightening(true)
+      .foregroundColor(.purple)
+      .frame(width: width, alignment: .center)
+      .contentTransition(.numericText())
   }
 
   private func stickerStatusView(assetName: String, size: CGFloat) -> some View {
