@@ -15,6 +15,13 @@ class BlockedProfileSession {
   var breakEndTime: Date?
   var usedBreakDurationInSeconds: TimeInterval = 0
 
+  /// Breaks taken per physical unblock item, keyed by the item's id. Only the
+  /// NFC Breaks strategy writes these; every other strategy leaves it empty.
+  var tagBreakUsage: [String: Int] = [:]
+
+  /// The item whose break is currently running, so only that tag can end it.
+  var activeBreakTagID: String?
+
   var pauseStartTime: Date?
   var pauseEndTime: Date?
 

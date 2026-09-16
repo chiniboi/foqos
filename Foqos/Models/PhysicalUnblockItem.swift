@@ -8,6 +8,11 @@ struct PhysicalUnblockItem: Codable, Hashable, Identifiable, Sendable {
   var type: PhysicalUnblockType
   var codeValue: String
 
+  /// Break settings used by the NFC Breaks strategy. Optional so items saved
+  /// before this existed keep decoding.
+  var breakDurationInMinutes: Int?
+  var breakCount: Int?
+
   enum PhysicalUnblockType: String, Codable, CaseIterable, Sendable {
     case nfc = "nfc"
     case qrCode = "qrCode"
@@ -24,12 +29,16 @@ struct PhysicalUnblockItem: Codable, Hashable, Identifiable, Sendable {
     id: UUID = UUID(),
     name: String,
     type: PhysicalUnblockType,
-    codeValue: String
+    codeValue: String,
+    breakDurationInMinutes: Int? = nil,
+    breakCount: Int? = nil
   ) {
     self.id = id
     self.name = name
     self.type = type
     self.codeValue = codeValue
+    self.breakDurationInMinutes = breakDurationInMinutes
+    self.breakCount = breakCount
   }
 
   static func resolvedItems(
@@ -79,7 +88,9 @@ struct PhysicalUnblockItem: Codable, Hashable, Identifiable, Sendable {
         id: item.id,
         name: trimmedName.isEmpty ? item.type.displayName : trimmedName,
         type: item.type,
-        codeValue: normalizedCodeValue
+        codeValue: normalizedCodeValue,
+        breakDurationInMinutes: item.breakDurationInMinutes,
+        breakCount: item.breakCount
       )
     }
 
@@ -108,5 +119,37 @@ struct PhysicalUnblockItem: Codable, Hashable, Identifiable, Sendable {
     }
 
     return components.string ?? trimmedCodeValue
+  }
+}
+
+// MARK: - NFC Breaks settings
+
+extension PhysicalUnblockItem {
+  static let minimumBreakDurationInMinutes = 10
+  static let maximumBreakDurationInMinutes = 120
+  static let defaultBreakDurationInMinutes = 15
+
+  static let minimumBreakCount = 1
+  static let maximumBreakCount = 3
+  static let defaultBreakCount = 1
+
+  /// Minutes a single break from this tag lasts, clamped to what the UI offers.
+  var resolvedBreakDurationInMinutes: Int {
+    let minutes = breakDurationInMinutes ?? Self.defaultBreakDurationInMinutes
+    return min(
+      max(minutes, Self.minimumBreakDurationInMinutes),
+      Self.maximumBreakDurationInMinutes
+    )
+  }
+
+  /// How many breaks this tag is worth per session.
+  var resolvedBreakCount: Int {
+    let count = breakCount ?? Self.defaultBreakCount
+    return min(max(count, Self.minimumBreakCount), Self.maximumBreakCount)
+  }
+
+  /// Every minute this tag can release over a session.
+  var totalBreakAllowanceInMinutes: Int {
+    resolvedBreakDurationInMinutes * resolvedBreakCount
   }
 }

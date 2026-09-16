@@ -6,6 +6,9 @@ enum BreakSessionError: LocalizedError, Equatable {
   case pauseActive(profileName: String)
   case allowanceExhausted(profileName: String)
   case schedulingFailed(reason: String)
+  case tagNotConfigured
+  case tagExhausted(tagName: String)
+  case wrongTagForActiveBreak(tagName: String)
 
   var errorDescription: String? {
     switch self {
@@ -20,6 +23,12 @@ enum BreakSessionError: LocalizedError, Equatable {
       return "No break time remains for \(profileName)."
     case .schedulingFailed(let reason):
       return "Could not schedule the end of the break: \(reason)"
+    case .tagNotConfigured:
+      return "That tag is not set up for breaks on this profile."
+    case .tagExhausted(let tagName):
+      return "\(tagName) has no breaks left in this session."
+    case .wrongTagForActiveBreak(let tagName):
+      return "A break from \(tagName) is running. Scan that tag again to lock back early."
     }
   }
 }

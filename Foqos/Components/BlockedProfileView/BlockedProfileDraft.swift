@@ -103,6 +103,25 @@ final class BlockedProfileDraft: ObservableObject {
     return selectedStrategy?.supportsAllowMode ?? true
   }
 
+  /// The NFC Breaks strategy gives every tag its own break length and count,
+  /// instead of one break budget shared by the whole profile.
+  var selectedStrategyUsesTagBreaks: Bool {
+    return selectedStrategy?.getIdentifier() == NFCBreaksBlockingStrategy.id
+  }
+
+  var nfcUnblockItems: [PhysicalUnblockItem] {
+    return physicalUnblockItems.filter { $0.type == .nfc }
+  }
+
+  /// Every break minute the tags can release together. Saved as the profile's
+  /// break budget so the existing break machinery never cuts a tag break short.
+  var totalTagBreakMinutes: Int {
+    return max(
+      nfcUnblockItems.reduce(0) { $0 + $1.totalBreakAllowanceInMinutes },
+      PhysicalUnblockItem.defaultBreakDurationInMinutes
+    )
+  }
+
   func save(
     existingProfile: BlockedProfiles?,
     in context: ModelContext
@@ -115,6 +134,8 @@ final class BlockedProfileDraft: ObservableObject {
     let physicalUnblockItemsToSave: [PhysicalUnblockItem]? =
       physicalUnblockItems.isEmpty ? nil : physicalUnblockItems
     let enableTimedBreaksToSave = selectedStrategyAllowsTimedBreaks && enableBreaks
+    let breakMinutesToSave =
+      selectedStrategyUsesTagBreaks ? totalTagBreakMinutes : breakTimeInMinutes
 
     if let existingProfile {
       let updatedProfile = try BlockedProfiles.updateProfile(
@@ -129,7 +150,7 @@ final class BlockedProfileDraft: ObservableObject {
         reminderTime: reminderTimeSeconds,
         customReminderMessage: customReminderMessage,
         enableBreaks: enableTimedBreaksToSave,
-        breakTimeInMinutes: breakTimeInMinutes,
+        breakTimeInMinutes: breakMinutesToSave,
         allowMultipleBreaks: enableTimedBreaksToSave && allowMultipleBreaks,
         enableStrictMode: enableStrictMode,
         enableBlockAppInstallation: enableBlockAppInstallation,
@@ -160,7 +181,7 @@ final class BlockedProfileDraft: ObservableObject {
       reminderTimeInSeconds: reminderTimeSeconds,
       customReminderMessage: customReminderMessage,
       enableBreaks: enableTimedBreaksToSave,
-      breakTimeInMinutes: breakTimeInMinutes,
+      breakTimeInMinutes: breakMinutesToSave,
       allowMultipleBreaks: enableTimedBreaksToSave && allowMultipleBreaks,
       enableStrictMode: enableStrictMode,
       enableBlockAppInstallation: enableBlockAppInstallation,
@@ -184,6 +205,13 @@ final class BlockedProfileDraft: ObservableObject {
     if !selectedStrategyAllowsTimedBreaks {
       enableBreaks = false
       allowMultipleBreaks = false
+    }
+
+    if selectedStrategyUsesTagBreaks {
+      // Breaks are the whole point of this strategy, and each tag tracks its
+      // own count, so both switches stay on and stay out of the UI.
+      enableBreaks = true
+      allowMultipleBreaks = true
     }
 
     if !selectedStrategySupportsAllowMode && enableAllowMode {

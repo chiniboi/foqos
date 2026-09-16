@@ -6,6 +6,7 @@ class StrategyManager: ObservableObject {
   static var shared = StrategyManager()
 
   static let availableStrategies: [BlockingStrategy] = [
+    NFCBreaksBlockingStrategy(),
     NFCSoftUnblockBlockingStrategy(),
     QRSoftUnblockBlockingStrategy(),
     ManualBlockingStrategy(),
@@ -43,6 +44,7 @@ class StrategyManager: ObservableObject {
 
   private let timersUtil = TimersUtil()
   private let appBlocker = AppBlockerUtil()
+  private let tagBreakScanner = NFCScannerUtil()
 
   var isBlocking: Bool {
     return activeSession?.isActive == true
@@ -110,6 +112,11 @@ class StrategyManager: ObservableObject {
   }
 
   func toggleBreak(context: ModelContext) {
+    if usesTagBreaks(context: context) {
+      scanForTagBreak(context: context)
+      return
+    }
+
     do {
       if getActiveSession(context: context)?.isBreakActive == true {
         _ = try endBreakFromBackground(context: context)
@@ -512,6 +519,130 @@ class StrategyManager: ObservableObject {
     }
 
     return strategy
+  }
+
+  // MARK: - NFC Breaks
+
+  /// True when the active session belongs to a profile using the NFC Breaks
+  /// strategy, where breaks are bought by scanning a specific tag.
+  func usesTagBreaks(context: ModelContext) -> Bool {
+    return getActiveSession(context: context)?.blockedProfile.blockingStrategyId
+      == NFCBreaksBlockingStrategy.id
+  }
+
+  /// Asks for a tag, then starts that tag's break or ends the one it started.
+  func scanForTagBreak(context: ModelContext) {
+    guard let session = getActiveSession(context: context) else {
+      errorMessage = BreakSessionError.noActiveSession.localizedDescription
+      return
+    }
+
+    let scanPrompt = session.isBreakActive ? "End Break" : "Take a Break"
+
+    tagBreakScanner.onError = { message in
+      self.errorMessage = message
+    }
+
+    tagBreakScanner.onTagScanned = { tag in
+      self.handleTagBreakScan(context: context, scannedValue: tag.url ?? tag.id)
+    }
+
+    tagBreakScanner.scan(profileName: "\(session.blockedProfile.name) - \(scanPrompt)")
+  }
+
+  private func handleTagBreakScan(context: ModelContext, scannedValue: String) {
+    guard let session = getActiveSession(context: context) else {
+      errorMessage = BreakSessionError.noActiveSession.localizedDescription
+      return
+    }
+
+    let items = session.blockedProfile.physicalUnblockItems ?? []
+    let normalizedValue = PhysicalUnblockItem.normalizedCodeValue(scannedValue, type: .nfc)
+
+    guard
+      let item = items.first(where: { $0.type == .nfc && $0.codeValue == normalizedValue })
+    else {
+      errorMessage = BreakSessionError.tagNotConfigured.localizedDescription
+      return
+    }
+
+    do {
+      if session.isBreakActive {
+        // Only the tag that opened the break can close it early.
+        let activeItem = session.activeBreakItem(in: items)
+        guard activeItem == nil || activeItem?.id == item.id else {
+          throw BreakSessionError.wrongTagForActiveBreak(tagName: activeItem?.name ?? item.name)
+        }
+
+        _ = try endBreakFromBackground(context: context)
+      } else {
+        try startTagBreak(context: context, session: session, item: item)
+      }
+    } catch {
+      errorMessage = error.localizedDescription
+    }
+  }
+
+  /// Starts a break sized by the scanned tag and books it against that tag's
+  /// own allowance, rather than the profile-wide break budget.
+  func startTagBreak(
+    context: ModelContext,
+    session: BlockedProfileSession,
+    item: PhysicalUnblockItem,
+    scheduleBreak: (BlockedProfiles, TimeInterval) throws -> Void =
+      DeviceActivityCenterUtil.scheduleBreakTimerActivity
+  ) throws {
+    let profile = session.blockedProfile
+
+    guard !session.isPauseActive else {
+      throw BreakSessionError.pauseActive(profileName: profile.name)
+    }
+
+    guard session.breaksRemaining(for: item) > 0 else {
+      throw BreakSessionError.tagExhausted(tagName: item.name)
+    }
+
+    let durationInSeconds = TimeInterval(item.resolvedBreakDurationInMinutes * 60)
+
+    // Make sure blocking can resume on its own before letting the apps open.
+    do {
+      try scheduleBreak(profile, durationInSeconds)
+    } catch {
+      throw BreakSessionError.schedulingFailed(reason: error.localizedDescription)
+    }
+
+    let previousStart = session.breakStartTime
+    let previousEnd = session.breakEndTime
+    let previousUsage = session.tagBreakUsage
+    let previousActiveTagID = session.activeBreakTagID
+
+    session.startBreak()
+    session.activeBreakTagID = item.id.uuidString
+    session.tagBreakUsage[item.id.uuidString] = session.breaksUsed(for: item) + 1
+
+    do {
+      try context.save()
+    } catch {
+      session.breakStartTime = previousStart
+      session.breakEndTime = previousEnd
+      session.tagBreakUsage = previousUsage
+      session.activeBreakTagID = previousActiveTagID
+      SharedData.createActiveSharedSession(for: session.toSnapshot())
+      DeviceActivityCenterUtil.removeBreakTimerActivity(for: profile)
+      appBlocker.activateRestrictions(for: BlockedProfiles.getSnapshot(for: profile))
+      throw error
+    }
+
+    ActiveProfileSyncStore.publish(session: session)
+    appBlocker.deactivateRestrictionsForBreak(for: BlockedProfiles.getSnapshot(for: profile))
+
+    scheduleBreakReminder(profile: profile, durationInSeconds: durationInSeconds)
+
+    WidgetCenter.shared.reloadTimelines(ofKind: "ProfileControlWidget")
+
+    updateSessionTimes()
+
+    liveActivityManager.updateBreakState(session: session)
   }
 
   func startBreakFromBackground(

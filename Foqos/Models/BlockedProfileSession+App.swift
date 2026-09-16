@@ -88,6 +88,22 @@ extension BlockedProfileSession {
     return completedSingleBreakDuration(at: date)
   }
 
+  /// Breaks this session has already taken with a given tag.
+  func breaksUsed(for item: PhysicalUnblockItem) -> Int {
+    tagBreakUsage[item.id.uuidString] ?? 0
+  }
+
+  /// Breaks this tag has left in this session.
+  func breaksRemaining(for item: PhysicalUnblockItem) -> Int {
+    max(0, item.resolvedBreakCount - breaksUsed(for: item))
+  }
+
+  /// The item whose break is running right now, if any.
+  func activeBreakItem(in items: [PhysicalUnblockItem]) -> PhysicalUnblockItem? {
+    guard let activeBreakTagID else { return nil }
+    return items.first { $0.id.uuidString == activeBreakTagID }
+  }
+
   func remainingBreakAllowance(at date: Date = Date()) -> TimeInterval {
     max(0, totalBreakAllowanceInSeconds - usedBreakDurationIncludingActiveBreak(at: date))
   }
@@ -107,6 +123,7 @@ extension BlockedProfileSession {
 
   func endBreak(at date: Date = Date()) {
     let breakEndTime = date
+    activeBreakTagID = nil
 
     if blockedProfile.allowMultipleBreaks {
       let completedDuration = activeBreakElapsedTime(at: breakEndTime)

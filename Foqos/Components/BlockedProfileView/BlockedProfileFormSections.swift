@@ -263,7 +263,8 @@ struct BlockedProfileStrictUnlocksFields: View {
   var body: some View {
     BlockedProfilePhysicalUnblockSelector(
       physicalUnblockItems: $draft.physicalUnblockItems,
-      disabled: disabled
+      disabled: disabled,
+      showsQRCodes: !draft.selectedStrategyUsesTagBreaks
     )
   }
 }
@@ -321,7 +322,9 @@ struct BlockedProfileBreaksFields: View {
 
   @ViewBuilder
   var body: some View {
-    if draft.selectedStrategyAllowsTimedBreaks {
+    if draft.selectedStrategyUsesTagBreaks {
+      BlockedProfileTagBreaksFields(draft: draft, disabled: disabled)
+    } else if draft.selectedStrategyAllowsTimedBreaks {
       CustomToggle(
         title: "Allow Timed Breaks",
         description:

@@ -4,6 +4,7 @@ enum BlockingStrategyArtwork {
     switch strategyID {
     case "ManualBlockingStrategy": return "ManualLogoSticker"
     case "NFCBlockingStrategy": return "NFCStickerLogo"
+    case "NFCBreaksBlockingStrategy": return "NFCPauseSticker"
     case "NFCManualBlockingStrategy": return "Manual+NFCSticker"
     case "NFCPauseTimerBlockingStrategy": return "NFCPauseSticker"
     case "NFCSoftUnblockBlockingStrategy": return "Soft Unblock + NFC"
