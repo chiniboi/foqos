@@ -53,7 +53,20 @@ class LiveActivityManager: ObservableObject {
     }
   }
 
+  /// Live Activities cover breaks only. A whole session on the Lock Screen is
+  /// noise; the minutes left in a break are what you actually want to see.
+  static let breaksOnly = true
+
   func startSessionActivity(session: BlockedProfileSession) {
+    guard !Self.breaksOnly else {
+      print("Live Activities are limited to breaks, not starting one for the session")
+      return
+    }
+
+    startActivity(session: session)
+  }
+
+  private func startActivity(session: BlockedProfileSession) {
     // Check if Live Activities are supported
     guard isSupported else {
       print("Live Activities are not supported on this device")
@@ -123,6 +136,20 @@ class LiveActivityManager: ObservableObject {
   }
 
   func updateBreakState(session: BlockedProfileSession) {
+    if Self.breaksOnly {
+      // The break owns the activity: it appears when the break starts and goes
+      // away when the break ends.
+      guard session.isBreakActive else {
+        endSessionActivity()
+        return
+      }
+
+      guard currentActivity != nil else {
+        startActivity(session: session)
+        return
+      }
+    }
+
     guard let activity = currentActivity else {
       print("No Live Activity to update for break state")
       return

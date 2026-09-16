@@ -550,7 +550,7 @@ struct BlockedProfileNotificationsFields: View {
     CustomToggle(
       title: "Live Activity",
       description:
-        "Show session progress on the Lock Screen.",
+        "Show a running break on the Lock Screen.",
       isOn: $draft.enableLiveActivity,
       isDisabled: disabled
     )
