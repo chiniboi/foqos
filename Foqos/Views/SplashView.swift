@@ -228,29 +228,33 @@ struct SplashView: View {
 
     roadProgress = Array(repeating: 0, count: origins.count)
 
-    withAnimation(.easeOut(duration: 0.5)) {
+    // the chart arrives first and is allowed to settle
+    withAnimation(.easeOut(duration: 0.45)) {
       mapOpacity = 1
     }
 
-    withAnimation(.easeOut(duration: 0.7).delay(0.25)) {
+    withAnimation(.easeOut(duration: 0.6).delay(0.2)) {
       wordmarkOpacity = 1
     }
 
-    // each road travels at its own pace, all of them in before two seconds
+    // then the roads draw onto it, each at its own pace
+    let roadsBegin = 0.8
     for index in origins.indices {
-      let duration = 0.85 + Double(index % 5) * 0.2
-      let delay = Double(index % 4) * 0.07
+      let duration = 0.7 + Double(index % 5) * 0.15
+      let delay = roadsBegin + Double(index % 4) * 0.06
 
       withAnimation(.easeInOut(duration: duration).delay(delay)) {
         roadProgress[index] = 1
       }
     }
 
-    withAnimation(.easeOut(duration: 1.7).repeatForever(autoreverses: false).delay(0.6)) {
+    withAnimation(
+      .easeOut(duration: 1.7).repeatForever(autoreverses: false).delay(roadsBegin + 0.2)
+    ) {
       pulse = 1.6
     }
 
-    DispatchQueue.main.asyncAfter(deadline: .now() + 2.2) {
+    DispatchQueue.main.asyncAfter(deadline: .now() + 2.6) {
       onFinished()
     }
   }
