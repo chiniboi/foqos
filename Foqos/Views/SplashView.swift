@@ -1,23 +1,19 @@
 import SwiftUI
 
-/// The first thing you see: the mark over a world whose roads all run to one
-/// point in Italy. Nothing says where it is; the lines just go there.
+/// The first thing you see: a quiet map whose roads all run to one point in
+/// Italy. Nothing says where that is; the roads simply go there.
 struct SplashView: View {
   var onFinished: () -> Void
 
-  @State private var roadProgress: [CGFloat] = []
-  @State private var markScale: CGFloat = 0.82
-  @State private var markOpacity: CGFloat = 0
-  @State private var haloScale: CGFloat = 0.6
+  @Environment(\.colorScheme) private var colorScheme
 
-  private let background = Color(hex: "#fbf8dd")
-  private let land = Color(hex: "#3a7a33")
-  private let road = Color(hex: "#2d3a2a")
+  @State private var roadProgress: [CGFloat] = []
+  @State private var pulse: CGFloat = 0.4
+  @State private var mapOpacity: CGFloat = 0
 
   private let rome = WorldMapData.point(longitude: 12.5, latitude: 41.9)
 
-  /// Where the roads start. Spread across the continents so the lines arrive
-  /// from every direction.
+  /// Where the roads set out from. Spread wide so they arrive from every side.
   private let origins: [CGPoint] = [
     WorldMapData.point(longitude: -123.1, latitude: 49.3),  // Vancouver
     WorldMapData.point(longitude: -74.0, latitude: 40.7),  // New York
@@ -32,125 +28,126 @@ struct SplashView: View {
     WorldMapData.point(longitude: 151.2, latitude: -33.9),  // Sydney
   ]
 
+  private var palette: Palette { colorScheme == .dark ? .night : .day }
+
   var body: some View {
     ZStack {
-      background.ignoresSafeArea()
+      palette.paper.ignoresSafeArea()
 
       GeometryReader { geometry in
         let frame = mapFrame(in: geometry.size)
 
         ZStack {
-          coastlines(in: frame)
+          graticule(in: frame)
+
+          land(in: frame)
 
           roads(in: frame)
 
           destination(in: frame)
         }
+        .opacity(Double(mapOpacity))
       }
       .ignoresSafeArea()
-
-      LokiLogo(size: 188)
-        .scaleEffect(markScale)
-        .opacity(markOpacity)
-        .shadow(color: road.opacity(0.18), radius: 24, y: 10)
     }
     .contentShape(Rectangle())
     .onTapGesture(perform: onFinished)
     .onAppear(perform: run)
   }
 
-  private func coastlines(in frame: CGRect) -> some View {
+  // MARK: - Layers
+
+  /// Meridians and parallels every 20 degrees: enough to read as a chart
+  /// rather than a doodle.
+  private func graticule(in frame: CGRect) -> some View {
     Path { path in
-      for shape in WorldMapData.shapes {
-        guard let first = shape.first else { continue }
+      for longitude in stride(from: -180.0, through: 180.0, by: 20.0) {
+        let top = place(WorldMapData.point(longitude: longitude, latitude: 90), in: frame)
+        let bottom = place(WorldMapData.point(longitude: longitude, latitude: -90), in: frame)
+        path.move(to: top)
+        path.addLine(to: bottom)
+      }
+
+      for latitude in stride(from: -80.0, through: 80.0, by: 20.0) {
+        let left = place(WorldMapData.point(longitude: -180, latitude: latitude), in: frame)
+        let right = place(WorldMapData.point(longitude: 180, latitude: latitude), in: frame)
+        path.move(to: left)
+        path.addLine(to: right)
+      }
+    }
+    .stroke(palette.grid, lineWidth: 0.6)
+  }
+
+  private func land(in frame: CGRect) -> some View {
+    let shape = Path { path in
+      for coastline in WorldMapData.shapes {
+        guard let first = coastline.first else { continue }
 
         path.move(to: place(first, in: frame))
-        for point in shape.dropFirst() {
+        for point in coastline.dropFirst() {
           path.addLine(to: place(point, in: frame))
         }
         path.closeSubpath()
       }
     }
-    .stroke(land.opacity(0.45), style: StrokeStyle(lineWidth: 1.1, lineJoin: .round))
+
+    return ZStack {
+      shape.fill(palette.land)
+      shape.stroke(palette.coast, style: StrokeStyle(lineWidth: 0.7, lineJoin: .round))
+    }
   }
 
   private func roads(in frame: CGRect) -> some View {
     ForEach(origins.indices, id: \.self) { index in
-      roadPath(from: origins[index], seed: index, in: frame)
-        .trim(from: 0, to: progress(at: index))
-        .stroke(
-          road.opacity(0.7),
-          style: StrokeStyle(lineWidth: 1.6, lineCap: .round, lineJoin: .round)
-        )
+      let path = roadPath(from: origins[index], seed: index, in: frame)
+      let progress = progress(at: index)
+
+      ZStack {
+        // a soft underlay so the road reads against the coastlines
+        path
+          .trim(from: 0, to: progress)
+          .stroke(
+            palette.roadGlow,
+            style: StrokeStyle(lineWidth: 3.4, lineCap: .round, lineJoin: .round)
+          )
+
+        path
+          .trim(from: 0, to: progress)
+          .stroke(
+            palette.road,
+            style: StrokeStyle(lineWidth: 1.1, lineCap: .round, lineJoin: .round)
+          )
+      }
     }
-  }
-
-  private func progress(at index: Int) -> CGFloat {
-    index < roadProgress.count ? roadProgress[index] : 0
-  }
-
-  /// A road rather than a ruler line: it bows one way, wanders a little on the
-  /// way, and still ends up in the same place.
-  private func roadPath(from origin: CGPoint, seed: Int, in frame: CGRect) -> Path {
-    let start = place(origin, in: frame)
-    let end = place(rome, in: frame)
-    let dx = end.x - start.x
-    let dy = end.y - start.y
-    let length = max(1, sqrt(dx * dx + dy * dy))
-    let normal = CGPoint(x: -dy / length, y: dx / length)
-
-    var generator = SeededGenerator(seed: UInt64(seed) &* 2_654_435_761 &+ 11)
-    let bow = CGFloat.random(in: 0.1...0.22, using: &generator)
-      * (Bool.random(using: &generator) ? 1 : -1)
-
-    let segments = 7
-    var points: [CGPoint] = [start]
-    for step in 1..<segments {
-      let t = CGFloat(step) / CGFloat(segments)
-      let along = CGPoint(x: start.x + dx * t, y: start.y + dy * t)
-      let arc = sin(t * .pi) * bow * length
-      let wander = CGFloat.random(in: -0.045...0.045, using: &generator) * length
-      let offset = arc + wander
-      points.append(
-        CGPoint(x: along.x + normal.x * offset, y: along.y + normal.y * offset)
-      )
-    }
-    points.append(end)
-
-    // round the corners off so the turns look driven rather than drawn
-    var path = Path()
-    path.move(to: points[0])
-    for index in 1..<(points.count - 1) {
-      let next = points[index + 1]
-      let mid = CGPoint(x: (points[index].x + next.x) / 2, y: (points[index].y + next.y) / 2)
-      path.addQuadCurve(to: mid, control: points[index])
-    }
-    path.addLine(to: points[points.count - 1])
-
-    return path
   }
 
   private func destination(in frame: CGRect) -> some View {
     let point = place(rome, in: frame)
+    let arrived = progress(at: 0)
 
     return ZStack {
       Circle()
-        .stroke(land.opacity(0.5), lineWidth: 1.2)
-        .frame(width: 34, height: 34)
-        .scaleEffect(haloScale)
-        .opacity(Double(2 - haloScale))
+        .stroke(palette.road.opacity(0.45), lineWidth: 1)
+        .frame(width: 46, height: 46)
+        .scaleEffect(pulse)
+        .opacity(Double(1.5 - pulse))
 
       Circle()
-        .fill(land)
-        .frame(width: 7, height: 7)
+        .stroke(palette.road.opacity(0.7), lineWidth: 1.2)
+        .frame(width: 13, height: 13)
+
+      Circle()
+        .fill(palette.marker)
+        .frame(width: 5.5, height: 5.5)
     }
     .position(point)
-    .opacity(Double(progress(at: 0)))
+    .opacity(Double(arrived))
   }
 
-  /// The map is equirectangular, so it wants a 2:1 box. It is sized to show
-  /// most of the world and then shifted so Rome lands dead centre, under the
-  /// mark, with every road arriving there.
+  // MARK: - Geometry
+
+  /// Equirectangular wants a 2:1 box. Size it to show most of the world, then
+  /// shift it so Rome sits dead centre.
   private func mapFrame(in size: CGSize) -> CGRect {
     let width = size.width * 3.0
     let height = width / 2
@@ -170,33 +167,104 @@ struct SplashView: View {
     )
   }
 
+  private func progress(at index: Int) -> CGFloat {
+    index < roadProgress.count ? roadProgress[index] : 0
+  }
+
+  /// A long route rather than a ruled line: it leaves at its own angle, bends
+  /// once across the middle, and straightens as it arrives.
+  private func roadPath(from origin: CGPoint, seed: Int, in frame: CGRect) -> Path {
+    let start = place(origin, in: frame)
+    let end = place(rome, in: frame)
+    let dx = end.x - start.x
+    let dy = end.y - start.y
+    let length = max(1, sqrt(dx * dx + dy * dy))
+    let normal = CGPoint(x: -dy / length, y: dx / length)
+
+    var generator = SeededGenerator(seed: UInt64(seed) &* 2_654_435_761 &+ 11)
+    let bow = CGFloat.random(in: 0.08...0.16, using: &generator)
+      * (Bool.random(using: &generator) ? 1 : -1)
+    let lean = CGFloat.random(in: 0.3...0.7, using: &generator)
+
+    // one long arc, weighted towards one end, so the curve looks travelled
+    let first = CGPoint(
+      x: start.x + dx * lean * 0.6 + normal.x * bow * length,
+      y: start.y + dy * lean * 0.6 + normal.y * bow * length
+    )
+    let second = CGPoint(
+      x: start.x + dx * (0.55 + lean * 0.3) + normal.x * bow * length * 0.55,
+      y: start.y + dy * (0.55 + lean * 0.3) + normal.y * bow * length * 0.55
+    )
+
+    var path = Path()
+    path.move(to: start)
+    path.addCurve(to: end, control1: first, control2: second)
+
+    return path
+  }
+
   private func run() {
     guard roadProgress.isEmpty else { return }
 
     roadProgress = Array(repeating: 0, count: origins.count)
 
-    // every road travels at its own pace, and they are all in before 2 seconds
-    for index in origins.indices {
-      let duration = 0.8 + Double(index % 5) * 0.22
-      let delay = Double(index % 3) * 0.08
+    withAnimation(.easeOut(duration: 0.5)) {
+      mapOpacity = 1
+    }
 
-      withAnimation(.easeOut(duration: duration).delay(delay)) {
+    // each road travels at its own pace, all of them in before two seconds
+    for index in origins.indices {
+      let duration = 0.85 + Double(index % 5) * 0.2
+      let delay = Double(index % 4) * 0.07
+
+      withAnimation(.easeInOut(duration: duration).delay(delay)) {
         roadProgress[index] = 1
       }
     }
 
-    withAnimation(.spring(response: 0.7, dampingFraction: 0.7).delay(0.15)) {
-      markScale = 1
-      markOpacity = 1
-    }
-
-    withAnimation(.easeOut(duration: 1.6).repeatForever(autoreverses: false).delay(0.5)) {
-      haloScale = 1.9
+    withAnimation(.easeOut(duration: 1.7).repeatForever(autoreverses: false).delay(0.6)) {
+      pulse = 1.6
     }
 
     DispatchQueue.main.asyncAfter(deadline: .now() + 2.2) {
       onFinished()
     }
+  }
+}
+
+// MARK: - Colours
+
+extension SplashView {
+  /// Map colours for each appearance: paper and ink by day, a chart lit from
+  /// behind at night.
+  fileprivate struct Palette {
+    let paper: Color
+    let land: Color
+    let coast: Color
+    let grid: Color
+    let road: Color
+    let roadGlow: Color
+    let marker: Color
+
+    static let day = Palette(
+      paper: Color(hex: "#f7f5e6"),
+      land: Color(hex: "#3a7a33").opacity(0.09),
+      coast: Color(hex: "#3a7a33").opacity(0.55),
+      grid: Color(hex: "#3a7a33").opacity(0.1),
+      road: Color(hex: "#2d3a2a").opacity(0.75),
+      roadGlow: Color(hex: "#a3ec06").opacity(0.3),
+      marker: Color(hex: "#2d3a2a")
+    )
+
+    static let night = Palette(
+      paper: Color(hex: "#10150f"),
+      land: Color(hex: "#8ad44b").opacity(0.07),
+      coast: Color(hex: "#8ad44b").opacity(0.4),
+      grid: Color(hex: "#8ad44b").opacity(0.08),
+      road: Color(hex: "#a3ec06").opacity(0.8),
+      roadGlow: Color(hex: "#a3ec06").opacity(0.18),
+      marker: Color(hex: "#ffdd1e")
+    )
   }
 }
 
@@ -218,4 +286,9 @@ private struct SeededGenerator: RandomNumberGenerator {
 
 #Preview {
   SplashView(onFinished: {})
+}
+
+#Preview("Dark") {
+  SplashView(onFinished: {})
+    .preferredColorScheme(.dark)
 }

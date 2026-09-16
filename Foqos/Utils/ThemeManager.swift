@@ -5,12 +5,14 @@ class ThemeManager: ObservableObject {
   static let shared = ThemeManager()
 
   // Single source of truth for all theme colors
+  /// Each colour carries a darker shade for light backgrounds and a brighter one
+  /// for dark, so the palette keeps its contrast either way.
   static let availableColors: [(name: String, color: Color)] = [
-    ("Loki Green", Color(hex: "#3a7a33")),
-    ("Deep Forest", Color(hex: "#2d3a2a")),
-    ("Fresh Lime", Color(hex: "#8ad44b")),
-    ("Electric Lime", Color(hex: "#a3ec06")),
-    ("Sun Yellow", Color(hex: "#ffdd1e")),
+    ("Loki Green", .adaptive(light: "#3a7a33", dark: "#8ad44b")),
+    ("Deep Forest", .adaptive(light: "#2d3a2a", dark: "#7f9b73")),
+    ("Fresh Lime", .adaptive(light: "#5fa32a", dark: "#a3ec06")),
+    ("Electric Lime", .adaptive(light: "#71b505", dark: "#c6f950")),
+    ("Sun Yellow", .adaptive(light: "#c79a00", dark: "#ffdd1e")),
   ]
 
   private static let defaultColorName = "Loki Green"
@@ -39,6 +41,19 @@ class ThemeManager: ObservableObject {
 }
 
 extension Color {
+  /// A colour that changes with the appearance, given two hex shades.
+  static func adaptive(light: String, dark: String) -> Color {
+    #if canImport(UIKit)
+      return Color(
+        uiColor: UIColor { traits in
+          UIColor(Color(hex: traits.userInterfaceStyle == .dark ? dark : light))
+        }
+      )
+    #else
+      return Color(hex: light)
+    #endif
+  }
+
   init(hex: String) {
     let hex = hex.trimmingCharacters(in: CharacterSet.alphanumerics.inverted)
     var int: UInt64 = 0
