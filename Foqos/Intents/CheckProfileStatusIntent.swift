@@ -12,7 +12,7 @@ struct CheckProfileStatusIntent: AppIntent {
 
   @Parameter(title: "Profile") var profile: BlockedProfileEntity
 
-  static var title: LocalizedStringResource = "Foqos Profile Status"
+  static var title: LocalizedStringResource = "Loki Profile Status"
   static var parameterSummary: some ParameterSummary {
     Summary("Check whether \(\.$profile) is active")
   }

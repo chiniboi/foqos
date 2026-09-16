@@ -14,7 +14,7 @@ struct StartProfileIntent: LiveActivityIntent {
 
   @Parameter(title: "Duration minutes (Optional)") var durationInMinutes: Int?
 
-  static var title: LocalizedStringResource = "Start Foqos Profile"
+  static var title: LocalizedStringResource = "Start Loki Profile"
 
   static var parameterSummary: some ParameterSummary {
     Summary("Start \(\.$profile)") {

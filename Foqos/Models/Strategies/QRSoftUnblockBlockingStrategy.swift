@@ -7,7 +7,7 @@ final class QRSoftUnblockBlockingStrategy: BlockingStrategy {
   var name: String = "Temporary Access + QR"
   var description: String =
     "Block your apps, but allow a few short opens when you need them. Scan a QR code or barcode to stop the session."
-  var color: Color = .purple
+  var color: Color = Color(hex: "#3a7a33")
   var pickerCategory: BlockingStrategyPickerCategory = .forever
 
   var usesQRCode: Bool = true

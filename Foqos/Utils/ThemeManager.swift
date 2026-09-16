@@ -6,28 +6,14 @@ class ThemeManager: ObservableObject {
 
   // Single source of truth for all theme colors
   static let availableColors: [(name: String, color: Color)] = [
-    ("Grimace Purple", Color(hex: "#894fa3")),
-    ("Ocean Blue", Color(hex: "#007aff")),
-    ("Mint Fresh", Color(hex: "#00c6bf")),
-    ("Lime Zest", Color(hex: "#7fd800")),
-    ("Sunset Coral", Color(hex: "#ff5966")),
-    ("Hot Pink", Color(hex: "#ff2da5")),
-    ("Tangerine", Color(hex: "#ff9300")),
-    ("Lavender Dream", Color(hex: "#ba8eff")),
-    ("San Diego Merlot", Color(hex: "#7a1e3a")),
-    ("Forest Green", Color(hex: "#0b6e4f")),
-    ("Miami Vice", Color(hex: "#ff6ec7")),
-    ("Electric Lemonade", Color(hex: "#ccff00")),
-    ("Neon Grape", Color(hex: "#b026ff")),
-    ("Slate Stone", Color(hex: "#708090")),
-    ("Warm Sandstone", Color(hex: "#c4a77d")),
-    ("Midnight Navy", Color(hex: "#191970")),
-    ("Cherry Bomb", Color(hex: "#de3163")),
-    ("Turquoise Wave", Color(hex: "#40e0d0")),
-    ("Golden Hour", Color(hex: "#ffb347")),
+    ("Loki Green", Color(hex: "#3a7a33")),
+    ("Deep Forest", Color(hex: "#2d3a2a")),
+    ("Fresh Lime", Color(hex: "#8ad44b")),
+    ("Electric Lime", Color(hex: "#a3ec06")),
+    ("Sun Yellow", Color(hex: "#ffdd1e")),
   ]
 
-  private static let defaultColorName = "Grimace Purple"
+  private static let defaultColorName = "Loki Green"
 
   @AppStorage(
     "foqosThemeColorName", store: UserDefaults(suiteName: "group.com.chini.foqos"))

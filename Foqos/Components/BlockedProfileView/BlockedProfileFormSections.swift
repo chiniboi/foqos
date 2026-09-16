@@ -463,7 +463,7 @@ struct BlockedProfileSessionSafeguardsFields: View {
 
   var body: some View {
     CustomToggle(
-      title: "Require Foqos to Stop",
+      title: "Require Loki to Stop",
       description:
         "Prevent this profile from being stopped by Shortcuts, NFC links, or QR links outside the app.",
       isOn: $draft.disableBackgroundStops,

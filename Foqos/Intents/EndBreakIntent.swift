@@ -18,7 +18,7 @@ struct EndBreakIntent: AppIntent {
         context: modelContainer.mainContext
       )
     else {
-      return .result(dialog: "No Foqos break is active.")
+      return .result(dialog: "No Loki break is active.")
     }
 
     return .result(dialog: "Ended the break. \(profileName) is blocking again.")

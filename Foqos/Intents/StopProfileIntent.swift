@@ -12,7 +12,7 @@ struct StopProfileIntent: AppIntent {
 
   @Parameter(title: "Profile") var profile: BlockedProfileEntity
 
-  static var title: LocalizedStringResource = "Stop Foqos Profile"
+  static var title: LocalizedStringResource = "Stop Loki Profile"
 
   static var parameterSummary: some ParameterSummary {
     Summary("Stop \(\.$profile)")

@@ -14,7 +14,7 @@ struct ProfileControlWidget: Widget {
           ProfileWidgetBackground()
         }
     }
-    .configurationDisplayName("Foqos Profile")
+    .configurationDisplayName("Loki Profile")
     .description(
       "Your focus, at a glance. Weekly charts, a monthly activity grid, and your profile in your theme."
     )

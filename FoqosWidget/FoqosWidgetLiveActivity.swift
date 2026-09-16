@@ -68,7 +68,7 @@ struct FoqosWidgetLiveActivity: Widget {
         // Left side - App info
         VStack(alignment: .leading, spacing: 8) {
           HStack(spacing: 4) {
-            Text("Foqos")
+            Text("Loki")
               .font(.headline)
               .fontWeight(.bold)
               .foregroundColor(.primary)
@@ -129,7 +129,7 @@ struct FoqosWidgetLiveActivity: Widget {
         islandLeadingIcon(for: context.state, size: minimalLogoSize)
       }
       .widgetURL(URL(string: "http://www.foqos.app"))
-      .keylineTint(Color.purple)
+      .keylineTint(Color(hex: "#3a7a33"))
     }
   }
 
@@ -146,7 +146,7 @@ struct FoqosWidgetLiveActivity: Widget {
         .frame(width: expandedLogoSize, height: expandedLogoSize)
 
       VStack(alignment: .leading, spacing: 1) {
-        Text("Foqos")
+        Text("Loki")
           .font(.system(size: 18, weight: .bold, design: .rounded))
           .foregroundColor(.primary)
           .lineLimit(1)
@@ -231,7 +231,7 @@ struct FoqosWidgetLiveActivity: Widget {
       .lineLimit(1)
       .minimumScaleFactor(0.68)
       .allowsTightening(true)
-      .foregroundColor(.purple)
+      .foregroundColor(Color(hex: "#3a7a33"))
       .frame(width: width, alignment: .center)
       .contentTransition(.numericText())
   }
@@ -254,7 +254,7 @@ struct FoqosWidgetLiveActivity: Widget {
     .font(font)
     .fontWeight(.semibold)
     .monospacedDigit()
-    .foregroundColor(.purple)
+    .foregroundColor(Color(hex: "#3a7a33"))
     .contentTransition(.numericText())
   }
 
@@ -270,7 +270,7 @@ struct FoqosWidgetLiveActivity: Widget {
     .lineLimit(1)
     .minimumScaleFactor(0.76)
     .allowsTightening(true)
-    .foregroundColor(.purple)
+    .foregroundColor(Color(hex: "#3a7a33"))
     .frame(width: expandedTimerWidth, alignment: .center)
     .contentTransition(.numericText())
   }
@@ -285,7 +285,7 @@ struct FoqosWidgetLiveActivity: Widget {
     .lineLimit(1)
     .minimumScaleFactor(0.68)
     .allowsTightening(true)
-    .foregroundColor(.purple)
+    .foregroundColor(Color(hex: "#3a7a33"))
     .frame(width: compactTimerWidth, alignment: .center)
     .contentTransition(.numericText())
   }

@@ -20,14 +20,14 @@ struct ProfileWidgetEntryView: View {
           if let start = entry.sessionStartTime, !entry.isPauseActive, !entry.isBreakActive {
             Text(start, style: .timer)
           } else {
-            Text(entry.isSessionActive ? entry.statusLabel : entry.profileName ?? "Foqos")
+            Text(entry.isSessionActive ? entry.statusLabel : entry.profileName ?? "Loki")
           }
         } icon: {
           Image(systemName: statusSymbol)
         }
       case .accessoryRectangular:
         VStack(alignment: .leading, spacing: 3) {
-          Text(entry.profileName ?? "Foqos").font(.headline).lineLimit(1)
+          Text(entry.profileName ?? "Loki").font(.headline).lineLimit(1)
           Text("\(WidgetActivitySummary.durationLabel(entry.activity.weeklyDuration)) this week")
             .font(.caption)
           status(compact: false)

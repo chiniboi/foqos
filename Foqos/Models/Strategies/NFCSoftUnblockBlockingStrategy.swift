@@ -7,7 +7,7 @@ final class NFCSoftUnblockBlockingStrategy: BlockingStrategy {
   var name: String = "Temporary Access + NFC"
   var description: String =
     "Block your apps, but allow a few short opens when you need them. Scan an NFC tag to stop the session."
-  var color: Color = .purple
+  var color: Color = Color(hex: "#3a7a33")
   var pickerCategory: BlockingStrategyPickerCategory = .forever
 
   var usesNFC: Bool = true

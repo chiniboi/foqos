@@ -542,7 +542,7 @@ private struct GuidedProfileReviewContent: View {
     }
 
     if draft.disableBackgroundStops {
-      enabled.append("Foqos required to stop")
+      enabled.append("Loki required to stop")
     }
 
     if !draft.enableEmergencyUnblock {
