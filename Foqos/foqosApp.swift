@@ -52,6 +52,8 @@ struct foqosApp: App {
     FoqosShortcutsProvider.updateAppShortcutParameters()
   }
 
+  @State private var isShowingSplash = true
+
   var body: some Scene {
     WindowGroup {
       HomeView()
@@ -72,6 +74,16 @@ struct foqosApp: App {
           }
           handleUniversalLink(url)
 
+        }
+        .overlay {
+          if isShowingSplash {
+            SplashView {
+              withAnimation(.easeOut(duration: 0.45)) {
+                isShowingSplash = false
+              }
+            }
+            .transition(.opacity)
+          }
         }
         .environmentObject(requestAuthorizer)
         .environmentObject(donationManager)
