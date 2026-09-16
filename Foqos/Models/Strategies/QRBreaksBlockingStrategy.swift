@@ -11,13 +11,15 @@ class QRBreaksBlockingStrategy: BlockingStrategy {
   var name: String = "QR Breaks"
   var description: String =
     "Stays blocked for the whole session. Scan one of your QR codes to take that code's break, "
-    + "then scan the same code again to lock back early."
+    + "and lock back early whenever you want."
   var color: Color = .indigo
   var pickerCategory: BlockingStrategyPickerCategory = .mostPopular
 
   var usesQRCode: Bool = true
   var startsManually: Bool = true
   var allowsTimedBreaks: Bool = true
+  // The session only ends on its schedule: breaks are the way out, not stopping.
+  var allowsManualStop: Bool = false
 
   var onSessionCreation: ((SessionStatus) -> Void)?
   var onErrorMessage: ((String) -> Void)?

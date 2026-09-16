@@ -224,7 +224,7 @@ struct BlockedProfileView: View {
       }
       .sheet(isPresented: $showingStrategyPicker) {
         StrategyPicker(
-          strategies: StrategyManager.availableStrategies,
+          strategies: StrategyManager.selectableStrategies,
           selectedStrategy: $draft.selectedStrategy,
           isPresented: $showingStrategyPicker
         )

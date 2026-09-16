@@ -32,15 +32,36 @@ struct ActiveProfileSessionView: View {
   private let focusMessageTimer = Timer.publish(every: 10, on: .main, in: .common).autoconnect()
 
   private var showStopButton: Bool {
-    profile.showStopButton(elapsedTime: elapsedTime)
+    guard blockingStrategy?.allowsManualStop ?? true else { return false }
+
+    return profile.showStopButton(elapsedTime: elapsedTime)
   }
 
   private var stopButtonAction: BlockingStrategySessionAction {
     blockingStrategy?.activeSessionAction(isPauseActive: isPauseActive) ?? .stop()
   }
 
+  /// Profiles whose breaks belong to a scanned code name that code everywhere.
+  private var usesTagBreaks: Bool {
+    profile.blockingStrategyId == QRBreaksBlockingStrategy.id
+  }
+
+  private var activeBreakItem: PhysicalUnblockItem? {
+    guard isBreakActive, let session = strategyManager.activeSession else { return nil }
+
+    return session.activeBreakItem(in: profile.physicalUnblockItems ?? [])
+  }
+
   private var breakButtonTitle: String {
-    "Hold to " + (isBreakActive ? "Stop Break" : "Start Break")
+    guard usesTagBreaks else {
+      return "Hold to " + (isBreakActive ? "Stop Break" : "Start Break")
+    }
+
+    if let item = activeBreakItem {
+      return "End \(item.name) Break"
+    }
+
+    return isBreakActive ? "End Break" : "Scan for a Break"
   }
 
   private var focusMessage: String {
@@ -199,6 +220,10 @@ struct ActiveProfileSessionView: View {
       return "Paused"
     }
     if isBreakActive {
+      if let item = activeBreakItem {
+        return "\(item.name) Break"
+      }
+
       return "On a Break"
     }
     return nil
@@ -318,7 +343,7 @@ struct ActiveProfileSessionView: View {
             iconName: "cup.and.heat.waves.fill",
             imageName: "CoffeeStickerIcon",
             role: isBreakActive ? .warning : .standard,
-            requiresLongPress: true,
+            requiresLongPress: !usesTagBreaks,
             action: onBreakTapped
           )
         }

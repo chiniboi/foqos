@@ -5,18 +5,29 @@ import WidgetKit
 class StrategyManager: ObservableObject {
   static var shared = StrategyManager()
 
-  // NFC needs an entitlement a free developer account cannot have, so the NFC
-  // strategies are left out of this build. Their files still exist.
+  /// Every strategy the app can resolve, including ones no longer offered, so
+  /// profiles saved against them keep working.
   static let availableStrategies: [BlockingStrategy] = [
     QRBreaksBlockingStrategy(),
+    NFCSoftUnblockBlockingStrategy(),
     QRSoftUnblockBlockingStrategy(),
     ManualBlockingStrategy(),
+    NFCBlockingStrategy(),
+    NFCManualBlockingStrategy(),
+    NFCTimerBlockingStrategy(),
+    NFCPauseTimerBlockingStrategy(),
     QRCodeBlockingStrategy(),
     QRManualBlockingStrategy(),
     QRTimerBlockingStrategy(),
     QRPauseTimerBlockingStrategy(),
     ShortcutTimerBlockingStrategy(),
   ]
+
+  /// What the picker offers. NFC needs an entitlement this build does not have,
+  /// so those strategies are hidden rather than deleted.
+  static var selectableStrategies: [BlockingStrategy] {
+    availableStrategies.filter(\.isSelectable)
+  }
 
   @Published var elapsedTime: TimeInterval = 0
   @Published var sessionDisplayTime: TimeInterval = 0
@@ -31,9 +42,10 @@ class StrategyManager: ObservableObject {
 
   @Published var errorMessage: String?
 
-  @AppStorage("emergencyUnblocksRemaining") private var emergencyUnblocksRemaining: Int = 3
-  @AppStorage("emergencyUnblocksResetPeriodInWeeks") private
-    var emergencyUnblocksResetPeriodInWeeks: Int = 4
+  /// One emergency unblock per calendar month, and no way to change that.
+  static let emergencyUnblocksPerMonth = 1
+
+  @AppStorage("emergencyUnblocksRemaining") private var emergencyUnblocksRemaining: Int = 1
   @AppStorage("lastEmergencyUnblocksResetDate") private var lastEmergencyUnblocksResetDateTimestamp:
     Double = 0
 
@@ -401,12 +413,13 @@ class StrategyManager: ObservableObject {
   }
 
   func getRemainingEmergencyUnblocks() -> Int {
-    return emergencyUnblocksRemaining
+    // Clamped in case a build with a larger allowance left a bigger number behind.
+    return min(emergencyUnblocksRemaining, Self.emergencyUnblocksPerMonth)
   }
 
   func emergencyUnblock(context: ModelContext) {
     // Do not allow emergency unblocks if there are no remaining
-    if emergencyUnblocksRemaining == 0 {
+    if getRemainingEmergencyUnblocks() == 0 {
       return
     }
 
@@ -435,7 +448,7 @@ class StrategyManager: ObservableObject {
   }
 
   func resetEmergencyUnblocks() {
-    emergencyUnblocksRemaining = 3
+    emergencyUnblocksRemaining = Self.emergencyUnblocksPerMonth
     lastEmergencyUnblocksResetDateTimestamp = Date().timeIntervalSinceReferenceDate
   }
 
@@ -446,16 +459,10 @@ class StrategyManager: ObservableObject {
       return
     }
 
-    let lastResetDate = Date(
-      timeIntervalSinceReferenceDate: lastEmergencyUnblocksResetDateTimestamp)
-    let weeksInSeconds: TimeInterval = TimeInterval(
-      emergencyUnblocksResetPeriodInWeeks * 7 * 24 * 60 * 60)
-    let elapsedTime = Date().timeIntervalSince(lastResetDate)
+    guard let nextResetDate = getNextResetDate() else { return }
 
-    // Check if the reset period has elapsed
-    if elapsedTime >= weeksInSeconds {
-      emergencyUnblocksRemaining = 3
-      lastEmergencyUnblocksResetDateTimestamp = Date().timeIntervalSinceReferenceDate
+    if Date() >= nextResetDate {
+      resetEmergencyUnblocks()
     }
   }
 
@@ -466,21 +473,8 @@ class StrategyManager: ObservableObject {
 
     let lastResetDate = Date(
       timeIntervalSinceReferenceDate: lastEmergencyUnblocksResetDateTimestamp)
-    let calendar = Calendar.current
-    return calendar.date(
-      byAdding: .weekOfYear,
-      value: emergencyUnblocksResetPeriodInWeeks,
-      to: lastResetDate
-    )
-  }
 
-  func getResetPeriodInWeeks() -> Int {
-    return emergencyUnblocksResetPeriodInWeeks
-  }
-
-  func setResetPeriodInWeeks(_ weeks: Int) {
-    emergencyUnblocksResetPeriodInWeeks = weeks
-    lastEmergencyUnblocksResetDateTimestamp = Date().timeIntervalSinceReferenceDate
+    return Calendar.current.date(byAdding: .month, value: 1, to: lastResetDate)
   }
 
   static func getStrategyFromId(id: String) -> BlockingStrategy {
@@ -491,7 +485,7 @@ class StrategyManager: ObservableObject {
     {
       return strategy
     } else {
-      return NFCBlockingStrategy()
+      return QRBreaksBlockingStrategy()
     }
   }
 
@@ -534,24 +528,99 @@ class StrategyManager: ObservableObject {
       return
     }
 
-    let isEndingBreak = session.isBreakActive
-    let scanner = LabeledCodeScannerView(
-      heading: isEndingBreak ? "Scan to end the break" : "Scan for a break",
-      subtitle: isEndingBreak
-        ? "Point your camera at the code that started this break to lock back early."
-        : "Point your camera at one of this profile's codes to take its break."
-    ) { result in
-      self.dismissView()
+    // A running break is ended from the app, so only starting one needs a scan.
+    if session.isBreakActive {
+      presentEndTagBreakConfirmation(context: context, session: session)
+      return
+    }
 
+    let scanner = LabeledCodeScannerView(
+      heading: "Scan for a break",
+      subtitle: "Point your camera at one of this profile's codes to take its break.",
+      simulatedData: simulatedBreakCode(for: session)
+    ) { result in
       switch result {
       case .success(let scan):
         self.handleTagBreakScan(context: context, scannedValue: scan.string)
       case .failure(let error):
+        self.dismissView()
         self.errorMessage = error.localizedDescription
       }
     }
 
     presentCustomStrategyView(scanner, presentationDetents: [.medium, .large])
+  }
+
+  /// The simulator has no camera, so scanning there resolves to the profile's
+  /// first code to keep the flow testable.
+  private func simulatedBreakCode(for session: BlockedProfileSession) -> String? {
+    #if targetEnvironment(simulator)
+      return session.blockedProfile.physicalUnblockItems?
+        .first(where: { $0.type == .qrCode })?
+        .codeValue
+    #else
+      return nil
+    #endif
+  }
+
+  /// Asks before a break starts, naming the code and how long it is worth.
+  private func presentTagBreakConfirmation(
+    context: ModelContext,
+    session: BlockedProfileSession,
+    item: PhysicalUnblockItem
+  ) {
+    let confirmation = TagBreakConfirmationView(
+      item: item,
+      isEnding: false,
+      breaksRemainingAfter: max(0, session.breaksRemaining(for: item) - 1),
+      onCancel: { self.dismissView() },
+      onConfirm: {
+        self.dismissView()
+
+        do {
+          try self.startTagBreak(context: context, session: session, item: item)
+        } catch {
+          self.errorMessage = error.localizedDescription
+        }
+      }
+    )
+
+    presentCustomStrategyView(confirmation, presentationDetents: [.medium, .large])
+  }
+
+  /// Asks before a running break is cut short.
+  private func presentEndTagBreakConfirmation(
+    context: ModelContext,
+    session: BlockedProfileSession
+  ) {
+    let items = session.blockedProfile.physicalUnblockItems ?? []
+
+    guard let item = session.activeBreakItem(in: items) else {
+      // Nothing to name, so just end it.
+      endTagBreak(context: context)
+      return
+    }
+
+    let confirmation = TagBreakConfirmationView(
+      item: item,
+      isEnding: true,
+      breaksRemainingAfter: session.breaksRemaining(for: item),
+      onCancel: { self.dismissView() },
+      onConfirm: {
+        self.dismissView()
+        self.endTagBreak(context: context)
+      }
+    )
+
+    presentCustomStrategyView(confirmation, presentationDetents: [.medium, .large])
+  }
+
+  private func endTagBreak(context: ModelContext) {
+    do {
+      _ = try endBreakFromBackground(context: context)
+    } catch {
+      errorMessage = error.localizedDescription
+    }
   }
 
   private func handleTagBreakScan(context: ModelContext, scannedValue: String) {
@@ -566,25 +635,18 @@ class StrategyManager: ObservableObject {
     guard
       let item = items.first(where: { $0.type == .qrCode && $0.codeValue == normalizedValue })
     else {
+      dismissView()
       errorMessage = BreakSessionError.tagNotConfigured.localizedDescription
       return
     }
 
-    do {
-      if session.isBreakActive {
-        // Only the tag that opened the break can close it early.
-        let activeItem = session.activeBreakItem(in: items)
-        guard activeItem == nil || activeItem?.id == item.id else {
-          throw BreakSessionError.wrongTagForActiveBreak(tagName: activeItem?.name ?? item.name)
-        }
-
-        _ = try endBreakFromBackground(context: context)
-      } else {
-        try startTagBreak(context: context, session: session, item: item)
-      }
-    } catch {
-      errorMessage = error.localizedDescription
+    guard session.breaksRemaining(for: item) > 0 else {
+      dismissView()
+      errorMessage = BreakSessionError.tagExhausted(tagName: item.name).localizedDescription
+      return
     }
+
+    presentTagBreakConfirmation(context: context, session: session, item: item)
   }
 
   /// Starts a break sized by the scanned tag and books it against that tag's

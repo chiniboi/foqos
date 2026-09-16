@@ -90,7 +90,37 @@ enum SessionTimeCalculator {
       return session.startTime.addingTimeInterval(timerDuration)
     }
 
-    return nil
+    // A profile with a schedule always has an end in sight, even when the
+    // session was started by hand, so the clock can count down to it.
+    return scheduledBlockEndTime(for: session)
+  }
+
+  /// The next time this profile's schedule lets go, counted from the session start.
+  static func scheduledBlockEndTime(for session: BlockedProfileSession) -> Date? {
+    guard let schedule = session.blockedProfile.schedule, schedule.isActive else {
+      return nil
+    }
+
+    let calendar = Calendar.current
+    let start = session.startTime
+
+    guard
+      let sameDayEnd = calendar.date(
+        bySettingHour: schedule.endHour,
+        minute: schedule.endMinute,
+        second: 0,
+        of: start
+      )
+    else {
+      return nil
+    }
+
+    if sameDayEnd > start {
+      return sameDayEnd
+    }
+
+    // The block runs past midnight, so it ends tomorrow.
+    return calendar.date(byAdding: .day, value: 1, to: sameDayEnd)
   }
 
   static func isTimerSession(_ session: BlockedProfileSession) -> Bool {
