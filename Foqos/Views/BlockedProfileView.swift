@@ -150,18 +150,6 @@ struct BlockedProfileView: View {
             if !isBlocking {
               Menu {
                 Button {
-                  writeProfile()
-                } label: {
-                  Label("Write to NFC Tag", systemImage: "tag")
-                }
-
-                Button {
-                  showingGeneratedQRCode = true
-                } label: {
-                  Label("Generate QR code", systemImage: "qrcode")
-                }
-
-                Button {
                   cloneName = validProfile.name + " Copy"
                   showingClonePrompt = true
                 } label: {

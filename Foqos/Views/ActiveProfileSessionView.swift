@@ -25,9 +25,6 @@ struct ActiveProfileSessionView: View {
   @State private var focusMessageIndex = Self.initialFocusMessageIndex()
   @State private var animationSettings = ActiveSessionAnimationSettings.defaultValue
 
-  #if DEBUG
-    @State private var showingAnimationTuning = false
-  #endif
 
   private let focusMessageTimer = Timer.publish(every: 10, on: .main, in: .common).autoconnect()
 
@@ -159,10 +156,6 @@ struct ActiveProfileSessionView: View {
       }
 
       Spacer()
-
-      #if DEBUG
-        animationTuningControl
-      #endif
     }
   }
 
@@ -176,44 +169,6 @@ struct ActiveProfileSessionView: View {
     .foregroundStyle(.primary)
     .accessibilityLabel("Close")
   }
-
-  #if DEBUG
-    private var animationTuningControl: some View {
-      ZStack {
-        if #available(iOS 26.0, *) {
-          animationTuningButton
-            .buttonStyle(.glass)
-            .buttonBorderShape(.circle)
-        } else {
-          animationTuningButton
-            .background(.ultraThinMaterial, in: Circle())
-            .overlay {
-              Circle()
-                .strokeBorder(Color.primary.opacity(0.1), lineWidth: 1)
-            }
-            .buttonStyle(ActiveSessionPressStyle())
-        }
-      }
-      .popover(isPresented: $showingAnimationTuning) {
-        ActiveSessionAnimationTuningView(
-          settings: $animationSettings,
-          tint: themeManager.themeColor
-        )
-        .presentationCompactAdaptation(.popover)
-      }
-    }
-
-    private var animationTuningButton: some View {
-      Button(action: { showingAnimationTuning = true }) {
-        Image(systemName: "slider.horizontal.3")
-          .font(.system(size: 16, weight: .semibold))
-          .frame(width: 40, height: 40)
-          .contentShape(Circle())
-      }
-      .foregroundStyle(.primary)
-      .accessibilityLabel("Animation controls")
-    }
-  #endif
 
   private var statusMessage: String? {
     if isPauseActive {
@@ -412,115 +367,6 @@ private struct ActiveSessionAnimationSettings: Equatable {
   var breathingDuration: Double
 }
 
-#if DEBUG
-  private struct ActiveSessionAnimationTuningView: View {
-    @Binding var settings: ActiveSessionAnimationSettings
-
-    let tint: Color
-
-    var body: some View {
-      VStack(alignment: .leading, spacing: 16) {
-        HStack {
-          Text("Rose Petals")
-            .font(.headline)
-
-          Spacer()
-
-          Button("Reset") {
-            settings = .defaultValue
-          }
-          .font(.subheadline.weight(.semibold))
-        }
-
-        tuningSlider(
-          title: "Petals",
-          valueText: String(Int(settings.petalCount.rounded())),
-          value: $settings.petalCount,
-          range: 5...12,
-          step: 1
-        )
-
-        tuningSlider(
-          title: "Petal visibility",
-          valueText: String(format: "%.2f×", settings.visibility),
-          value: $settings.visibility,
-          range: 0.25...2.5,
-          step: 0.05
-        )
-
-        tuningSlider(
-          title: "Petal width",
-          valueText: String(format: "%.2f×", settings.petalWidth),
-          value: $settings.petalWidth,
-          range: 0.5...2,
-          step: 0.05
-        )
-
-        tuningSlider(
-          title: "Petal length",
-          valueText: String(format: "%.2f×", settings.petalLength),
-          value: $settings.petalLength,
-          range: 0.8...1.25,
-          step: 0.05
-        )
-
-        tuningSlider(
-          title: "Bloom size",
-          valueText: String(format: "%.2f×", settings.bloomScale),
-          value: $settings.bloomScale,
-          range: 0.75...1.15,
-          step: 0.05
-        )
-
-        tuningSlider(
-          title: "Center opening",
-          valueText: String(format: "%.0f pt", settings.centerOpening),
-          value: $settings.centerOpening,
-          range: 0...80,
-          step: 2
-        )
-
-        tuningSlider(
-          title: "Breathing cycle",
-          valueText: String(format: "%.0fs", settings.breathingDuration),
-          value: $settings.breathingDuration,
-          range: 10...30,
-          step: 1
-        )
-
-        Text("Debug only · Values reset when this screen closes")
-          .font(.caption)
-          .foregroundStyle(.secondary)
-      }
-      .padding(20)
-      .frame(width: 320)
-      .tint(tint)
-    }
-
-    private func tuningSlider(
-      title: String,
-      valueText: String,
-      value: Binding<Double>,
-      range: ClosedRange<Double>,
-      step: Double
-    ) -> some View {
-      VStack(alignment: .leading, spacing: 6) {
-        HStack {
-          Text(title)
-            .font(.subheadline)
-
-          Spacer()
-
-          Text(valueText)
-            .font(.system(.caption, design: .monospaced, weight: .semibold))
-            .foregroundStyle(.secondary)
-        }
-
-        Slider(value: value, in: range, step: step)
-      }
-    }
-  }
-#endif
 
 private struct ActiveSessionPetalAnimation: View {
   @Environment(\.accessibilityReduceMotion) private var accessibilityReduceMotion

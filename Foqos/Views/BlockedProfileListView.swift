@@ -32,11 +32,9 @@ struct BlockedProfileListView: View {
   ) private var activeSessions: [BlockedProfileSession]
 
   @State private var profileCreationDestination: ProfileCreationDestination?
-  @State private var showingDataExport = false
 
   @State private var profileToEdit: BlockedProfiles?
   @State private var showErrorAlert = false
-  @State private var editMode: EditMode = .inactive
 
   var body: some View {
     NavigationStack {
@@ -70,15 +68,11 @@ struct BlockedProfileListView: View {
               ProfileRow(profile: profile, isActive: profile.id == activeSessionProfileId)
                 .contentShape(Rectangle())
                 .onTapGesture {
-                  if editMode == .inactive {
-                    profileToEdit = profile
-                  }
+                  profileToEdit = profile
                 }
             }
-            .onDelete(perform: editMode == .active ? deleteProfiles : nil)
-            .onMove(perform: editMode == .active ? moveProfiles : nil)
+            .onDelete(perform: deleteProfiles)
           }
-          .environment(\.editMode, $editMode)
         }
       }
       .navigationTitle("Profiles")
@@ -90,28 +84,6 @@ struct BlockedProfileListView: View {
         }
 
         ToolbarItemGroup(placement: .topBarTrailing) {
-          if editMode == .active {
-            Button(action: { editMode = .inactive }) {
-              Image(systemName: "checkmark.circle")
-            }
-          }
-          if !profiles.isEmpty {
-            Menu {
-              Button {
-                editMode = .active
-              } label: {
-                Label("Edit/Move", systemImage: "pencil")
-              }
-
-              Button {
-                showingDataExport = true
-              } label: {
-                Label("Export Data", systemImage: "square.and.arrow.up")
-              }
-            } label: {
-              Image(systemName: "ellipsis.circle")
-            }
-          }
           if canCreateProfiles {
             Menu {
               Button {
@@ -141,9 +113,6 @@ struct BlockedProfileListView: View {
       }
       .sheet(item: $profileToEdit) { profile in
         BlockedProfileView(profile: profile)
-      }
-      .sheet(isPresented: $showingDataExport) {
-        BlockedProfileDataExportView()
       }
       .alert(
         "Cannot Delete Active Profile",
@@ -194,16 +163,6 @@ struct BlockedProfileListView: View {
     }
   }
 
-  private func moveProfiles(from source: IndexSet, to destination: Int) {
-    var reorderedProfiles = Array(profiles)
-    reorderedProfiles.move(fromOffsets: source, toOffset: destination)
-
-    do {
-      try BlockedProfiles.reorderProfiles(reorderedProfiles, in: context)
-    } catch {
-      print("Failed to reorder profiles: \(error)")
-    }
-  }
 }
 
 #Preview {

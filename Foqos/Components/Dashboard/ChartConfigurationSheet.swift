@@ -2,19 +2,12 @@ import SwiftUI
 
 struct ChartConfigurationSheet: View {
   @EnvironmentObject var themeManager: ThemeManager
-  @Binding var showHabitTracker: Bool
   @Binding var chartType: HabitChartType
   let onDismiss: () -> Void
 
   var body: some View {
     NavigationStack {
       List {
-        Section("Visibility") {
-          Toggle("Show Chart", isOn: $showHabitTracker)
-            .tint(themeManager.themeColor)
-        }
-        .listRowInsets(EdgeInsets(top: 12, leading: 16, bottom: 12, trailing: 16))
-
         Section("Chart Type") {
           ForEach(HabitChartType.allCases, id: \.self) { type in
             Button {
@@ -81,12 +74,10 @@ struct ChartConfigurationSheet: View {
 
 #Preview {
   struct PreviewWrapper: View {
-    @State private var showChart = true
     @State private var chartType: HabitChartType = .fourWeek
 
     var body: some View {
       ChartConfigurationSheet(
-        showHabitTracker: $showChart,
         chartType: $chartType,
         onDismiss: {}
       )

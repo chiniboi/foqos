@@ -192,7 +192,6 @@ struct BlockedSessionsHabitTracker: View {
       .clipped()
       .sheet(isPresented: $showingConfiguration) {
         ChartConfigurationSheet(
-          showHabitTracker: $showHabitTracker,
           chartType: chartTypeBinding,
           onDismiss: { showingConfiguration = false }
         )

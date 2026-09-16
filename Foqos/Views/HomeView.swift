@@ -36,10 +36,9 @@ struct HomeView: View {
   @State private var dashboardInsightsContext: DashboardInsightsContext? = nil
 
   // Donation View
-  @State private var showDonationView = false
+  @State private var showInfoView = false
 
   // Settings View
-  @State private var showSettingsView = false
 
   // Active session view
   @State private var showActiveProfileSessionView = false
@@ -103,19 +102,12 @@ struct HomeView: View {
         HStack(alignment: .center) {
           AppTitle()
           Spacer()
-          HStack(spacing: 8) {
-            RoundedButton(
-              "Support",
-              action: {
-                showDonationView = true
-              },
-              imageName: "SupportStickerLogo")
-            RoundedButton(
-              "",
-              action: {
-                showSettingsView = true
-              }, iconName: "gear")
-          }
+          RoundedButton(
+            "Info",
+            action: {
+              showInfoView = true
+            },
+            iconName: "info.circle")
         }
         .padding(.trailing, 16)
         .padding(.top, 16)
@@ -340,11 +332,8 @@ struct HomeView: View {
         presentationDetents: strategyManager.customStrategyViewPresentationDetents
       )
     }
-    .sheet(isPresented: $showDonationView) {
-      SupportView()
-    }
-    .sheet(isPresented: $showSettingsView) {
-      SettingsView()
+    .sheet(isPresented: $showInfoView) {
+      InfoView()
     }
     .alert(alertTitle, isPresented: $showingAlert) {
       Button("OK", role: .cancel) { dismissAlert() }
