@@ -7,6 +7,11 @@ class RequestAuthorizer: ObservableObject {
   @Published var isAuthorized = false
 
   func refreshAuthorizationStatus() {
+    if DummyMode.isEnabled {
+      Task { @MainActor in self.isAuthorized = true }
+      return
+    }
+
     let isApproved = getAuthorizationStatus() == .approved
 
     Task { @MainActor in
@@ -15,6 +20,12 @@ class RequestAuthorizer: ObservableObject {
   }
 
   func requestAuthorization() {
+    if DummyMode.isEnabled {
+      // Nothing to ask for: a demo build cannot hold the Screen Time entitlement.
+      Task { @MainActor in self.isAuthorized = true }
+      return
+    }
+
     Task {
       do {
         try await AuthorizationCenter.shared.requestAuthorization(for: .individual)
@@ -34,6 +45,10 @@ class RequestAuthorizer: ObservableObject {
   }
 
   func getAuthorizationStatus() -> AuthorizationStatus {
+    if DummyMode.isEnabled {
+      return .approved
+    }
+
     return AuthorizationCenter.shared.authorizationStatus
   }
 }

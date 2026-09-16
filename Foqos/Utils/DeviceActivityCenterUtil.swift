@@ -54,6 +54,17 @@ class DeviceActivityCenterUtil {
     }
   }
 
+  /// Device Activity needs the Screen Time entitlement, so a demo build skips it
+  /// and StrategyManager runs the break countdown in the app instead.
+  static func scheduleBreakTimerActivityIfAvailable(
+    for profile: BlockedProfiles,
+    durationInSeconds: TimeInterval
+  ) throws {
+    if DummyMode.isEnabled { return }
+
+    try scheduleBreakTimerActivity(for: profile, durationInSeconds: durationInSeconds)
+  }
+
   static func scheduleBreakTimerActivity(
     for profile: BlockedProfiles,
     durationInSeconds: TimeInterval

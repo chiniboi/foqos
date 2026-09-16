@@ -21,7 +21,7 @@
 		C8D73DCC2F7C155D0028E76A /* FoqosShieldAction.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = C8D73DC32F7C155C0028E76A /* FoqosShieldAction.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		F0A200052F80000200000001 /* NetworkExtension.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F0A200042F80000200000001 /* NetworkExtension.framework */; };
 		F0A200062F80000200000001 /* NetworkExtension.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F0A200042F80000200000001 /* NetworkExtension.framework */; };
-		F0A200072F80000200000001 /* dev.ambitionsoftware.foqos.mac.filter.systemextension in Embed System Extensions */ = {isa = PBXBuildFile; fileRef = F0A200022F80000200000001 /* dev.ambitionsoftware.foqos.mac.filter.systemextension */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		F0A200072F80000200000001 /* com.chini.foqos.mac.filter.systemextension in Embed System Extensions */ = {isa = PBXBuildFile; fileRef = F0A200022F80000200000001 /* com.chini.foqos.mac.filter.systemextension */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		F0A200122F80000200000001 /* SystemExtensions.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F0A200132F80000200000001 /* SystemExtensions.framework */; };
 		F0A300052F80000300000001 /* FilterRules.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0A300012F80000300000001 /* FilterRules.swift */; };
 		F0A300062F80000300000001 /* FilterRules.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0A300012F80000300000001 /* FilterRules.swift */; };
@@ -115,7 +115,7 @@
 			dstPath = Contents/Library/SystemExtensions;
 			dstSubfolderSpec = 1;
 			files = (
-				F0A200072F80000200000001 /* dev.ambitionsoftware.foqos.mac.filter.systemextension in Embed System Extensions */,
+				F0A200072F80000200000001 /* com.chini.foqos.mac.filter.systemextension in Embed System Extensions */,
 			);
 			name = "Embed System Extensions";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -137,7 +137,7 @@
 		80FF388D2D80DB540032BC5E /* FoqosWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = FoqosWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		C8D73DC32F7C155C0028E76A /* FoqosShieldAction.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = FoqosShieldAction.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		F0A100022F80000100000001 /* Foqos for Mac.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Foqos for Mac.app"; sourceTree = BUILT_PRODUCTS_DIR; };
-		F0A200022F80000200000001 /* dev.ambitionsoftware.foqos.mac.filter.systemextension */ = {isa = PBXFileReference; explicitFileType = "wrapper.system-extension"; includeInIndex = 0; path = dev.ambitionsoftware.foqos.mac.filter.systemextension; sourceTree = BUILT_PRODUCTS_DIR; };
+		F0A200022F80000200000001 /* com.chini.foqos.mac.filter.systemextension */ = {isa = PBXFileReference; explicitFileType = "wrapper.system-extension"; includeInIndex = 0; path = com.chini.foqos.mac.filter.systemextension; sourceTree = BUILT_PRODUCTS_DIR; };
 		F0A200042F80000200000001 /* NetworkExtension.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = NetworkExtension.framework; path = System/Library/Frameworks/NetworkExtension.framework; sourceTree = SDKROOT; };
 		F0A200132F80000200000001 /* SystemExtensions.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemExtensions.framework; path = System/Library/Frameworks/SystemExtensions.framework; sourceTree = SDKROOT; };
 		F0A300012F80000300000001 /* FilterRules.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FilterRules.swift; sourceTree = "<group>"; };
@@ -480,7 +480,7 @@
 				808A3C4A2E4ACD18002A7812 /* FoqosShieldConfig.appex */,
 				C8D73DC32F7C155C0028E76A /* FoqosShieldAction.appex */,
 				F0A100022F80000100000001 /* Foqos for Mac.app */,
-				F0A200022F80000200000001 /* dev.ambitionsoftware.foqos.mac.filter.systemextension */,
+				F0A200022F80000200000001 /* com.chini.foqos.mac.filter.systemextension */,
 				F0C100032FA0000100000001 /* FoqosMacTests.xctest */,
 			);
 			name = Products;
@@ -738,8 +738,8 @@
 			name = FoqosFilter;
 			packageProductDependencies = (
 			);
-			productName = dev.ambitionsoftware.foqos.mac.filter;
-			productReference = F0A200022F80000200000001 /* dev.ambitionsoftware.foqos.mac.filter.systemextension */;
+			productName = com.chini.foqos.mac.filter;
+			productReference = F0A200022F80000200000001 /* com.chini.foqos.mac.filter.systemextension */;
 			productType = "com.apple.product-type.system-extension";
 		};
 		F0C100082FA0000100000001 /* FoqosMacTests */ = {
@@ -1047,7 +1047,7 @@
 				CODE_SIGN_ENTITLEMENTS = FoqosDeviceMonitor/FoqosDeviceMonitor.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = YR54789JNV;
+				DEVELOPMENT_TEAM = 3D9P4BNAAG;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = FoqosDeviceMonitor/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = FoqosDeviceMonitor;
@@ -1059,7 +1059,7 @@
 					"@executable_path/../../Frameworks",
 				);
 				MARKETING_VERSION = 2.3.0;
-				PRODUCT_BUNDLE_IDENTIFIER = dev.ambitionsoftware.foqos.FoqosDeviceMonitor;
+				PRODUCT_BUNDLE_IDENTIFIER = com.chini.foqos.FoqosDeviceMonitor;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
@@ -1080,7 +1080,7 @@
 				CODE_SIGN_ENTITLEMENTS = FoqosDeviceMonitor/FoqosDeviceMonitor.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = YR54789JNV;
+				DEVELOPMENT_TEAM = 3D9P4BNAAG;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = FoqosDeviceMonitor/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = FoqosDeviceMonitor;
@@ -1092,7 +1092,7 @@
 					"@executable_path/../../Frameworks",
 				);
 				MARKETING_VERSION = 2.3.0;
-				PRODUCT_BUNDLE_IDENTIFIER = dev.ambitionsoftware.foqos.FoqosDeviceMonitor;
+				PRODUCT_BUNDLE_IDENTIFIER = com.chini.foqos.FoqosDeviceMonitor;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
@@ -1237,12 +1237,13 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_ASSET_PATHS = "\"foqos/Preview Content\"";
-				DEVELOPMENT_TEAM = YR54789JNV;
+				DEVELOPMENT_TEAM = LGDXFVL6F7;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = foqos/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Foqos;
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
 				INFOPLIST_KEY_NFCReaderUsageDescription = "This app uses NFC to scan tags for item identification.";
 				INFOPLIST_KEY_NSCameraUsageDescription = "We need camera access to scan QR codes to active/deactivate profiles";
@@ -1261,7 +1262,7 @@
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 14.5;
 				MARKETING_VERSION = 2.3.0;
-				PRODUCT_BUNDLE_IDENTIFIER = dev.ambitionsoftware.foqos;
+				PRODUCT_BUNDLE_IDENTIFIER = com.chini.foqos;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = auto;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -1286,12 +1287,13 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_ASSET_PATHS = "\"foqos/Preview Content\"";
-				DEVELOPMENT_TEAM = YR54789JNV;
+				DEVELOPMENT_TEAM = LGDXFVL6F7;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = foqos/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Foqos;
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
 				INFOPLIST_KEY_NFCReaderUsageDescription = "This app uses NFC to scan tags for item identification.";
 				INFOPLIST_KEY_NSCameraUsageDescription = "We need camera access to scan QR codes to active/deactivate profiles";
@@ -1310,7 +1312,7 @@
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 14.5;
 				MARKETING_VERSION = 2.3.0;
-				PRODUCT_BUNDLE_IDENTIFIER = dev.ambitionsoftware.foqos;
+				PRODUCT_BUNDLE_IDENTIFIER = com.chini.foqos;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = auto;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -1329,12 +1331,12 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEAD_CODE_STRIPPING = YES;
-				DEVELOPMENT_TEAM = YR54789JNV;
+				DEVELOPMENT_TEAM = 3D9P4BNAAG;
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 				MACOSX_DEPLOYMENT_TARGET = 14.5;
 				MARKETING_VERSION = 2.1.2;
-				PRODUCT_BUNDLE_IDENTIFIER = dev.ambitionsoftware.foqosTests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.chini.foqosTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = auto;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
@@ -1353,12 +1355,12 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEAD_CODE_STRIPPING = YES;
-				DEVELOPMENT_TEAM = YR54789JNV;
+				DEVELOPMENT_TEAM = 3D9P4BNAAG;
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 				MACOSX_DEPLOYMENT_TARGET = 14.5;
 				MARKETING_VERSION = 2.1.2;
-				PRODUCT_BUNDLE_IDENTIFIER = dev.ambitionsoftware.foqosTests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.chini.foqosTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = auto;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
@@ -1376,12 +1378,12 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEAD_CODE_STRIPPING = YES;
-				DEVELOPMENT_TEAM = YR54789JNV;
+				DEVELOPMENT_TEAM = 3D9P4BNAAG;
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 				MACOSX_DEPLOYMENT_TARGET = 14.5;
 				MARKETING_VERSION = 2.1.2;
-				PRODUCT_BUNDLE_IDENTIFIER = dev.ambitionsoftware.foqosUITests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.chini.foqosUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = auto;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
@@ -1399,12 +1401,12 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEAD_CODE_STRIPPING = YES;
-				DEVELOPMENT_TEAM = YR54789JNV;
+				DEVELOPMENT_TEAM = 3D9P4BNAAG;
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 				MACOSX_DEPLOYMENT_TARGET = 14.5;
 				MARKETING_VERSION = 2.1.2;
-				PRODUCT_BUNDLE_IDENTIFIER = dev.ambitionsoftware.foqosUITests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.chini.foqosUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = auto;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
@@ -1422,7 +1424,7 @@
 				CODE_SIGN_ENTITLEMENTS = FoqosShieldConfig/FoqosShieldConfig.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = YR54789JNV;
+				DEVELOPMENT_TEAM = 3D9P4BNAAG;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = FoqosShieldConfig/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = FoqosShieldConfig;
@@ -1434,7 +1436,7 @@
 					"@executable_path/../../Frameworks",
 				);
 				MARKETING_VERSION = 2.3.0;
-				PRODUCT_BUNDLE_IDENTIFIER = dev.ambitionsoftware.foqos.FoqosShieldConfig;
+				PRODUCT_BUNDLE_IDENTIFIER = com.chini.foqos.FoqosShieldConfig;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
@@ -1450,7 +1452,7 @@
 				CODE_SIGN_ENTITLEMENTS = FoqosShieldConfig/FoqosShieldConfig.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = YR54789JNV;
+				DEVELOPMENT_TEAM = 3D9P4BNAAG;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = FoqosShieldConfig/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = FoqosShieldConfig;
@@ -1462,7 +1464,7 @@
 					"@executable_path/../../Frameworks",
 				);
 				MARKETING_VERSION = 2.3.0;
-				PRODUCT_BUNDLE_IDENTIFIER = dev.ambitionsoftware.foqos.FoqosShieldConfig;
+				PRODUCT_BUNDLE_IDENTIFIER = com.chini.foqos.FoqosShieldConfig;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
@@ -1481,7 +1483,7 @@
 				CODE_SIGN_ENTITLEMENTS = FoqosWidget/FoqosWidgetExtension.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = YR54789JNV;
+				DEVELOPMENT_TEAM = 3D9P4BNAAG;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = FoqosWidget/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = FoqosWidget;
@@ -1493,7 +1495,7 @@
 					"@executable_path/../../Frameworks",
 				);
 				MARKETING_VERSION = 2.3.0;
-				PRODUCT_BUNDLE_IDENTIFIER = dev.ambitionsoftware.foqos.FoqosWidget;
+				PRODUCT_BUNDLE_IDENTIFIER = com.chini.foqos.FoqosWidget;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
@@ -1511,7 +1513,7 @@
 				CODE_SIGN_ENTITLEMENTS = FoqosWidget/FoqosWidgetExtension.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = YR54789JNV;
+				DEVELOPMENT_TEAM = 3D9P4BNAAG;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = FoqosWidget/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = FoqosWidget;
@@ -1523,7 +1525,7 @@
 					"@executable_path/../../Frameworks",
 				);
 				MARKETING_VERSION = 2.3.0;
-				PRODUCT_BUNDLE_IDENTIFIER = dev.ambitionsoftware.foqos.FoqosWidget;
+				PRODUCT_BUNDLE_IDENTIFIER = com.chini.foqos.FoqosWidget;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
@@ -1540,7 +1542,7 @@
 				CODE_SIGN_ENTITLEMENTS = FoqosShieldAction/FoqosShieldAction.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = YR54789JNV;
+				DEVELOPMENT_TEAM = 3D9P4BNAAG;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = FoqosShieldAction/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = FoqosShieldAction;
@@ -1552,7 +1554,7 @@
 					"@executable_path/../../Frameworks",
 				);
 				MARKETING_VERSION = 2.3.0;
-				PRODUCT_BUNDLE_IDENTIFIER = dev.ambitionsoftware.foqos.FoqosShieldAction;
+				PRODUCT_BUNDLE_IDENTIFIER = com.chini.foqos.FoqosShieldAction;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
@@ -1568,7 +1570,7 @@
 				CODE_SIGN_ENTITLEMENTS = FoqosShieldAction/FoqosShieldAction.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = YR54789JNV;
+				DEVELOPMENT_TEAM = 3D9P4BNAAG;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = FoqosShieldAction/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = FoqosShieldAction;
@@ -1580,7 +1582,7 @@
 					"@executable_path/../../Frameworks",
 				);
 				MARKETING_VERSION = 2.3.0;
-				PRODUCT_BUNDLE_IDENTIFIER = dev.ambitionsoftware.foqos.FoqosShieldAction;
+				PRODUCT_BUNDLE_IDENTIFIER = com.chini.foqos.FoqosShieldAction;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
@@ -1599,7 +1601,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEAD_CODE_STRIPPING = YES;
-				DEVELOPMENT_TEAM = YR54789JNV;
+				DEVELOPMENT_TEAM = 3D9P4BNAAG;
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
@@ -1611,7 +1613,7 @@
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
 				MARKETING_VERSION = 0.1;
-				PRODUCT_BUNDLE_IDENTIFIER = dev.ambitionsoftware.foqos.mac;
+				PRODUCT_BUNDLE_IDENTIFIER = com.chini.foqos.mac;
 				PRODUCT_NAME = "Foqos for Mac";
 				SDKROOT = macosx;
 				SUPPORTED_PLATFORMS = macosx;
@@ -1629,7 +1631,7 @@
 				CODE_SIGN_IDENTITY = "Developer ID Application";
 				CODE_SIGN_STYLE = Manual;
 				DEAD_CODE_STRIPPING = YES;
-				DEVELOPMENT_TEAM = YR54789JNV;
+				DEVELOPMENT_TEAM = 3D9P4BNAAG;
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = NO;
@@ -1639,7 +1641,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				PRODUCT_BUNDLE_IDENTIFIER = dev.ambitionsoftware.foqos.mac;
+				PRODUCT_BUNDLE_IDENTIFIER = com.chini.foqos.mac;
 				PRODUCT_NAME = "Foqos for Mac";
 				PROVISIONING_PROFILE_SPECIFIER = "Foqos Mac Developer ID";
 				SDKROOT = macosx;
@@ -1658,7 +1660,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 12;
 				DEAD_CODE_STRIPPING = YES;
-				DEVELOPMENT_TEAM = YR54789JNV;
+				DEVELOPMENT_TEAM = 3D9P4BNAAG;
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = NO;
@@ -1670,7 +1672,7 @@
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
 				MARKETING_VERSION = 0.1;
-				PRODUCT_BUNDLE_IDENTIFIER = dev.ambitionsoftware.foqos.mac.filter;
+				PRODUCT_BUNDLE_IDENTIFIER = com.chini.foqos.mac.filter;
 				PRODUCT_NAME = "$(PRODUCT_BUNDLE_IDENTIFIER)";
 				SDKROOT = macosx;
 				SKIP_INSTALL = YES;
@@ -1688,7 +1690,7 @@
 				CODE_SIGN_IDENTITY = "Developer ID Application";
 				CODE_SIGN_STYLE = Manual;
 				DEAD_CODE_STRIPPING = YES;
-				DEVELOPMENT_TEAM = YR54789JNV;
+				DEVELOPMENT_TEAM = 3D9P4BNAAG;
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = NO;
@@ -1699,7 +1701,7 @@
 					"@executable_path/../../../../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				PRODUCT_BUNDLE_IDENTIFIER = dev.ambitionsoftware.foqos.mac.filter;
+				PRODUCT_BUNDLE_IDENTIFIER = com.chini.foqos.mac.filter;
 				PRODUCT_NAME = "$(PRODUCT_BUNDLE_IDENTIFIER)";
 				PROVISIONING_PROFILE_SPECIFIER = "Foqos Filter Developer ID";
 				SDKROOT = macosx;
@@ -1718,10 +1720,10 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEAD_CODE_STRIPPING = YES;
-				DEVELOPMENT_TEAM = YR54789JNV;
+				DEVELOPMENT_TEAM = 3D9P4BNAAG;
 				GENERATE_INFOPLIST_FILE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				PRODUCT_BUNDLE_IDENTIFIER = dev.ambitionsoftware.foqos.FoqosMacTests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.chini.foqos.FoqosMacTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
 				SUPPORTED_PLATFORMS = macosx;
@@ -1736,10 +1738,10 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEAD_CODE_STRIPPING = YES;
-				DEVELOPMENT_TEAM = YR54789JNV;
+				DEVELOPMENT_TEAM = 3D9P4BNAAG;
 				GENERATE_INFOPLIST_FILE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				PRODUCT_BUNDLE_IDENTIFIER = dev.ambitionsoftware.foqos.FoqosMacTests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.chini.foqos.FoqosMacTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
 				SUPPORTED_PLATFORMS = macosx;

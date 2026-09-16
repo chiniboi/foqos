@@ -1,21 +1,21 @@
 import SwiftData
 import SwiftUI
 
-/// Keeps a profile blocked for the whole session and lets individual NFC tags
-/// buy their own breaks. Each tag carries its own break length and how many
-/// breaks it is allowed per session, so a tag on the sofa can be worth a short
-/// break while a tag in the car is worth a long one.
-class NFCBreaksBlockingStrategy: BlockingStrategy {
-  static var id: String = "NFCBreaksBlockingStrategy"
+/// Keeps a profile blocked for the whole session and lets individual QR codes
+/// buy their own breaks. Each code carries its own break length and how many
+/// breaks it is allowed per session, so a sticker on the sofa can be worth a
+/// short break while one in the car is worth a long one.
+class QRBreaksBlockingStrategy: BlockingStrategy {
+  static var id: String = "QRBreaksBlockingStrategy"
 
-  var name: String = "NFC Breaks"
+  var name: String = "QR Breaks"
   var description: String =
-    "Stays blocked for the whole session. Scan one of your NFC tags to take that tag's break, "
-    + "then scan the same tag again to lock back early."
+    "Stays blocked for the whole session. Scan one of your QR codes to take that code's break, "
+    + "then scan the same code again to lock back early."
   var color: Color = .indigo
   var pickerCategory: BlockingStrategyPickerCategory = .mostPopular
 
-  var usesNFC: Bool = true
+  var usesQRCode: Bool = true
   var startsManually: Bool = true
   var allowsTimedBreaks: Bool = true
 
@@ -25,7 +25,7 @@ class NFCBreaksBlockingStrategy: BlockingStrategy {
   private let appBlocker: AppBlockerUtil = AppBlockerUtil()
 
   func getIdentifier() -> String {
-    return NFCBreaksBlockingStrategy.id
+    return QRBreaksBlockingStrategy.id
   }
 
   func startBlocking(
@@ -40,7 +40,7 @@ class NFCBreaksBlockingStrategy: BlockingStrategy {
       BlockedProfileSession
       .createSession(
         in: context,
-        withTag: NFCBreaksBlockingStrategy.id,
+        withTag: QRBreaksBlockingStrategy.id,
         withProfile: profile,
         forceStart: forceStart ?? false
       )

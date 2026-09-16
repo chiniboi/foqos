@@ -1,8 +1,8 @@
 import SwiftUI
 
-/// Break settings for the NFC Breaks strategy. Every registered NFC tag carries
+/// Break settings for the QR Breaks strategy. Every registered QR code carries
 /// its own break length and how many of those breaks it is worth per session,
-/// so a tag by the sofa can be short while a tag in the car is long.
+/// so a sticker by the sofa can be short while one in the car is long.
 struct BlockedProfileTagBreaksFields: View {
   @EnvironmentObject private var themeManager: ThemeManager
 
@@ -18,19 +18,19 @@ struct BlockedProfileTagBreaksFields: View {
 
   private var tagIndices: [Int] {
     draft.physicalUnblockItems.indices.filter {
-      draft.physicalUnblockItems[$0].type == .nfc
+      draft.physicalUnblockItems[$0].type == .qrCode
     }
   }
 
   var body: some View {
     if tagIndices.isEmpty {
       VStack(alignment: .leading, spacing: 6) {
-        Text("No NFC tags yet")
+        Text("No QR codes yet")
           .font(.subheadline)
           .fontWeight(.semibold)
 
         Text(
-          "Go back to Physical Unlocks and add the tags you want to use, then give each one its own break here."
+          "Go back to Physical Unlocks and add the codes you want to use, then give each one its own break here."
         )
         .font(.caption)
         .foregroundStyle(.secondary)

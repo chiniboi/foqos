@@ -59,6 +59,15 @@ enum SessionTimeCalculator {
     }
 
     if let breakStartTime = session.breakStartTime, session.isBreakActive {
+      // Tag breaks last exactly as long as the scanned tag is worth.
+      if let item = session.activeBreakItem(
+        in: session.blockedProfile.physicalUnblockItems ?? []
+      ) {
+        return breakStartTime.addingTimeInterval(
+          TimeInterval(item.resolvedBreakDurationInMinutes * 60)
+        )
+      }
+
       if session.blockedProfile.allowMultipleBreaks {
         let remainingAllowanceAtBreakStart = session.remainingBreakAllowance(at: breakStartTime)
         return breakStartTime.addingTimeInterval(remainingAllowanceAtBreakStart)

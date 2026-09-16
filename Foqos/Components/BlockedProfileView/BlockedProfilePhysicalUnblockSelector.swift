@@ -10,7 +10,9 @@ struct BlockedProfilePhysicalUnblockSelector: View {
   var disabled: Bool = false
   var disabledText: String?
 
-  /// The NFC Breaks strategy only works with tags, so its setup hides QR codes.
+  /// A demo build cannot read NFC, and the QR Breaks strategy is code only, so
+  /// either can hide a column.
+  var showsNFCTags: Bool = true
   var showsQRCodes: Bool = true
 
   @State private var showingQRCodeScanner = false
@@ -33,16 +35,18 @@ struct BlockedProfilePhysicalUnblockSelector: View {
   var body: some View {
     VStack(alignment: .leading, spacing: 12) {
       HStack(alignment: .top, spacing: 12) {
-        physicalUnblockColumn(
-          title: "NFC Tags",
-          description: "Add NFC tags that can unlock this profile while a session is active.",
-          systemImage: "wave.3.right.circle.fill",
-          assetImage: "NFCStickerLogo",
-          items: nfcItems,
-          emptyButtonTitle: "Set",
-          addButtonTitle: "Add Tag",
-          onAdd: addNFCTag
-        )
+        if showsNFCTags {
+          physicalUnblockColumn(
+            title: "NFC Tags",
+            description: "Add NFC tags that can unlock this profile while a session is active.",
+            systemImage: "wave.3.right.circle.fill",
+            assetImage: "NFCStickerLogo",
+            items: nfcItems,
+            emptyButtonTitle: "Set",
+            addButtonTitle: "Add Tag",
+            onAdd: addNFCTag
+          )
+        }
 
         if showsQRCodes {
           physicalUnblockColumn(

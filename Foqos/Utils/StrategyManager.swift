@@ -5,15 +5,12 @@ import WidgetKit
 class StrategyManager: ObservableObject {
   static var shared = StrategyManager()
 
+  // NFC needs an entitlement a free developer account cannot have, so the NFC
+  // strategies are left out of this build. Their files still exist.
   static let availableStrategies: [BlockingStrategy] = [
-    NFCBreaksBlockingStrategy(),
-    NFCSoftUnblockBlockingStrategy(),
+    QRBreaksBlockingStrategy(),
     QRSoftUnblockBlockingStrategy(),
     ManualBlockingStrategy(),
-    NFCBlockingStrategy(),
-    NFCManualBlockingStrategy(),
-    NFCTimerBlockingStrategy(),
-    NFCPauseTimerBlockingStrategy(),
     QRCodeBlockingStrategy(),
     QRManualBlockingStrategy(),
     QRTimerBlockingStrategy(),
@@ -44,7 +41,7 @@ class StrategyManager: ObservableObject {
 
   private let timersUtil = TimersUtil()
   private let appBlocker = AppBlockerUtil()
-  private let tagBreakScanner = NFCScannerUtil()
+  private var dummyBreakTimer: Timer?
 
   var isBlocking: Bool {
     return activeSession?.isActive == true
@@ -523,31 +520,38 @@ class StrategyManager: ObservableObject {
 
   // MARK: - NFC Breaks
 
-  /// True when the active session belongs to a profile using the NFC Breaks
-  /// strategy, where breaks are bought by scanning a specific tag.
+  /// True when the active session belongs to a profile using the QR Breaks
+  /// strategy, where breaks are bought by scanning a specific code.
   func usesTagBreaks(context: ModelContext) -> Bool {
     return getActiveSession(context: context)?.blockedProfile.blockingStrategyId
-      == NFCBreaksBlockingStrategy.id
+      == QRBreaksBlockingStrategy.id
   }
 
-  /// Asks for a tag, then starts that tag's break or ends the one it started.
+  /// Opens the camera, then starts that code's break or ends the one it started.
   func scanForTagBreak(context: ModelContext) {
     guard let session = getActiveSession(context: context) else {
       errorMessage = BreakSessionError.noActiveSession.localizedDescription
       return
     }
 
-    let scanPrompt = session.isBreakActive ? "End Break" : "Take a Break"
+    let isEndingBreak = session.isBreakActive
+    let scanner = LabeledCodeScannerView(
+      heading: isEndingBreak ? "Scan to end the break" : "Scan for a break",
+      subtitle: isEndingBreak
+        ? "Point your camera at the code that started this break to lock back early."
+        : "Point your camera at one of this profile's codes to take its break."
+    ) { result in
+      self.dismissView()
 
-    tagBreakScanner.onError = { message in
-      self.errorMessage = message
+      switch result {
+      case .success(let scan):
+        self.handleTagBreakScan(context: context, scannedValue: scan.string)
+      case .failure(let error):
+        self.errorMessage = error.localizedDescription
+      }
     }
 
-    tagBreakScanner.onTagScanned = { tag in
-      self.handleTagBreakScan(context: context, scannedValue: tag.url ?? tag.id)
-    }
-
-    tagBreakScanner.scan(profileName: "\(session.blockedProfile.name) - \(scanPrompt)")
+    presentCustomStrategyView(scanner, presentationDetents: [.medium, .large])
   }
 
   private func handleTagBreakScan(context: ModelContext, scannedValue: String) {
@@ -557,10 +561,10 @@ class StrategyManager: ObservableObject {
     }
 
     let items = session.blockedProfile.physicalUnblockItems ?? []
-    let normalizedValue = PhysicalUnblockItem.normalizedCodeValue(scannedValue, type: .nfc)
+    let normalizedValue = PhysicalUnblockItem.normalizedCodeValue(scannedValue, type: .qrCode)
 
     guard
-      let item = items.first(where: { $0.type == .nfc && $0.codeValue == normalizedValue })
+      let item = items.first(where: { $0.type == .qrCode && $0.codeValue == normalizedValue })
     else {
       errorMessage = BreakSessionError.tagNotConfigured.localizedDescription
       return
@@ -590,7 +594,7 @@ class StrategyManager: ObservableObject {
     session: BlockedProfileSession,
     item: PhysicalUnblockItem,
     scheduleBreak: (BlockedProfiles, TimeInterval) throws -> Void =
-      DeviceActivityCenterUtil.scheduleBreakTimerActivity
+      DeviceActivityCenterUtil.scheduleBreakTimerActivityIfAvailable
   ) throws {
     let profile = session.blockedProfile
 
@@ -636,6 +640,10 @@ class StrategyManager: ObservableObject {
     ActiveProfileSyncStore.publish(session: session)
     appBlocker.deactivateRestrictionsForBreak(for: BlockedProfiles.getSnapshot(for: profile))
 
+    if DummyMode.isEnabled {
+      startDummyBreakCountdown(context: context, durationInSeconds: durationInSeconds)
+    }
+
     scheduleBreakReminder(profile: profile, durationInSeconds: durationInSeconds)
 
     WidgetCenter.shared.reloadTimelines(ofKind: "ProfileControlWidget")
@@ -643,6 +651,20 @@ class StrategyManager: ObservableObject {
     updateSessionTimes()
 
     liveActivityManager.updateBreakState(session: session)
+  }
+
+  /// Demo builds have no Device Activity, so the break ends on an in-app timer.
+  /// It only fires while the app is running, which is enough to try the flow.
+  private func startDummyBreakCountdown(context: ModelContext, durationInSeconds: TimeInterval) {
+    dummyBreakTimer?.invalidate()
+    dummyBreakTimer = Timer.scheduledTimer(
+      withTimeInterval: durationInSeconds,
+      repeats: false
+    ) { [weak self] _ in
+      guard let self else { return }
+
+      _ = try? self.endBreakFromBackground(context: context)
+    }
   }
 
   func startBreakFromBackground(
@@ -714,6 +736,9 @@ class StrategyManager: ObservableObject {
   }
 
   func endBreakFromBackground(context: ModelContext) throws -> String? {
+    dummyBreakTimer?.invalidate()
+    dummyBreakTimer = nil
+
     activeSession = getActiveSession(context: context)
     guard let session = activeSession else {
       return nil

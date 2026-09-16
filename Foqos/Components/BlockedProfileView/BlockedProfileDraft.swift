@@ -81,7 +81,7 @@ final class BlockedProfileDraft: ObservableObject {
     if let profileStrategyId = profile?.blockingStrategyId {
       selectedStrategy = StrategyManager.getStrategyFromId(id: profileStrategyId)
     } else {
-      selectedStrategy = NFCBlockingStrategy()
+      selectedStrategy = QRBreaksBlockingStrategy()
     }
 
     // Restore persisted settings after the strategy observer has handled initial selection.
@@ -103,21 +103,21 @@ final class BlockedProfileDraft: ObservableObject {
     return selectedStrategy?.supportsAllowMode ?? true
   }
 
-  /// The NFC Breaks strategy gives every tag its own break length and count,
+  /// The QR Breaks strategy gives every code its own break length and count,
   /// instead of one break budget shared by the whole profile.
   var selectedStrategyUsesTagBreaks: Bool {
-    return selectedStrategy?.getIdentifier() == NFCBreaksBlockingStrategy.id
+    return selectedStrategy?.getIdentifier() == QRBreaksBlockingStrategy.id
   }
 
-  var nfcUnblockItems: [PhysicalUnblockItem] {
-    return physicalUnblockItems.filter { $0.type == .nfc }
+  var breakCodeItems: [PhysicalUnblockItem] {
+    return physicalUnblockItems.filter { $0.type == .qrCode }
   }
 
   /// Every break minute the tags can release together. Saved as the profile's
   /// break budget so the existing break machinery never cuts a tag break short.
   var totalTagBreakMinutes: Int {
     return max(
-      nfcUnblockItems.reduce(0) { $0 + $1.totalBreakAllowanceInMinutes },
+      breakCodeItems.reduce(0) { $0 + $1.totalBreakAllowanceInMinutes },
       PhysicalUnblockItem.defaultBreakDurationInMinutes
     )
   }
@@ -174,7 +174,7 @@ final class BlockedProfileDraft: ObservableObject {
       in: context,
       name: name,
       selection: selectedActivity,
-      blockingStrategyId: selectedStrategy?.getIdentifier() ?? NFCBlockingStrategy.id,
+      blockingStrategyId: selectedStrategy?.getIdentifier() ?? QRBreaksBlockingStrategy.id,
       strategyData: strategyData,
       askForStartSettings: askForStartSettings,
       enableLiveActivity: enableLiveActivity,

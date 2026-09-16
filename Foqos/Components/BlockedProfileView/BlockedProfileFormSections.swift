@@ -264,7 +264,7 @@ struct BlockedProfileStrictUnlocksFields: View {
     BlockedProfilePhysicalUnblockSelector(
       physicalUnblockItems: $draft.physicalUnblockItems,
       disabled: disabled,
-      showsQRCodes: !draft.selectedStrategyUsesTagBreaks
+      showsNFCTags: !DummyMode.isEnabled && !draft.selectedStrategyUsesTagBreaks
     )
   }
 }

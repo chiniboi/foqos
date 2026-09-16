@@ -4,7 +4,7 @@ import XCTest
 @testable import foqos
 
 @MainActor
-final class NFCBreaksTests: XCTestCase {
+final class QRBreaksTests: XCTestCase {
   private enum SchedulerError: LocalizedError {
     case unavailable
 
@@ -15,7 +15,7 @@ final class NFCBreaksTests: XCTestCase {
 
   private let kitchenTag = PhysicalUnblockItem(
     name: "Kitchen",
-    type: .nfc,
+    type: .qrCode,
     codeValue: "04AABBCC11223344",
     breakDurationInMinutes: 15,
     breakCount: 2
@@ -23,7 +23,7 @@ final class NFCBreaksTests: XCTestCase {
 
   private let carTag = PhysicalUnblockItem(
     name: "Car",
-    type: .nfc,
+    type: .qrCode,
     codeValue: "04DDEEFF55667788",
     breakDurationInMinutes: 120,
     breakCount: 1
@@ -42,7 +42,7 @@ final class NFCBreaksTests: XCTestCase {
   // MARK: - Per-tag settings
 
   func testSettingsFallBackToDefaultsWhenUnset() {
-    let item = PhysicalUnblockItem(name: "Sofa", type: .nfc, codeValue: "AA")
+    let item = PhysicalUnblockItem(name: "Sofa", type: .qrCode, codeValue: "AA")
 
     XCTAssertEqual(
       item.resolvedBreakDurationInMinutes,
@@ -54,14 +54,14 @@ final class NFCBreaksTests: XCTestCase {
   func testSettingsClampToWhatTheUIOffers() {
     let tooLong = PhysicalUnblockItem(
       name: "Car",
-      type: .nfc,
+      type: .qrCode,
       codeValue: "AA",
       breakDurationInMinutes: 600,
       breakCount: 9
     )
     let tooShort = PhysicalUnblockItem(
       name: "Sofa",
-      type: .nfc,
+      type: .qrCode,
       codeValue: "BB",
       breakDurationInMinutes: 1,
       breakCount: 0
@@ -185,7 +185,7 @@ final class NFCBreaksTests: XCTestCase {
     let items = [kitchenTag, carTag]
     let profile = BlockedProfiles(
       name: "Night",
-      blockingStrategyId: NFCBreaksBlockingStrategy.id,
+      blockingStrategyId: QRBreaksBlockingStrategy.id,
       enableBreaks: true,
       breakTimeInMinutes: items.reduce(0) { $0 + $1.totalBreakAllowanceInMinutes },
       allowMultipleBreaks: true,
@@ -195,7 +195,7 @@ final class NFCBreaksTests: XCTestCase {
 
     let session = BlockedProfileSession.createSession(
       in: context,
-      withTag: NFCBreaksBlockingStrategy.id,
+      withTag: QRBreaksBlockingStrategy.id,
       withProfile: profile,
       forceStart: false
     )
