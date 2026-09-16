@@ -10,6 +10,7 @@ struct SplashView: View {
   @State private var roadProgress: [CGFloat] = []
   @State private var pulse: CGFloat = 0.4
   @State private var mapOpacity: CGFloat = 0
+  @State private var wordmarkOpacity: CGFloat = 0
 
   private let rome = WorldMapData.point(longitude: 12.5, latitude: 41.9)
 
@@ -49,10 +50,29 @@ struct SplashView: View {
         .opacity(Double(mapOpacity))
       }
       .ignoresSafeArea()
+
+      VStack {
+        wordmark
+          .padding(.top, 96)
+
+        Spacer()
+      }
     }
     .contentShape(Rectangle())
     .onTapGesture(perform: onFinished)
     .onAppear(perform: run)
+  }
+
+  private var wordmark: some View {
+    Text("L o K i")
+      .font(.custom("Optima-Bold", size: 38))
+      .tracking(18)
+      // tracking also pads after the last letter, so nudge back to true centre
+      .offset(x: 9)
+      .foregroundStyle(palette.ink)
+      .opacity(Double(wordmarkOpacity))
+      .offset(y: (1 - wordmarkOpacity) * 10)
+      .accessibilityLabel("Loki")
   }
 
   // MARK: - Layers
@@ -212,6 +232,10 @@ struct SplashView: View {
       mapOpacity = 1
     }
 
+    withAnimation(.easeOut(duration: 0.7).delay(0.25)) {
+      wordmarkOpacity = 1
+    }
+
     // each road travels at its own pace, all of them in before two seconds
     for index in origins.indices {
       let duration = 0.85 + Double(index % 5) * 0.2
@@ -245,6 +269,7 @@ extension SplashView {
     let road: Color
     let roadGlow: Color
     let marker: Color
+    let ink: Color
 
     static let day = Palette(
       paper: Color(hex: "#f7f5e6"),
@@ -253,17 +278,19 @@ extension SplashView {
       grid: Color(hex: "#3a7a33").opacity(0.1),
       road: Color(hex: "#2d3a2a").opacity(0.75),
       roadGlow: Color(hex: "#a3ec06").opacity(0.3),
-      marker: Color(hex: "#2d3a2a")
+      marker: Color(hex: "#2d3a2a"),
+      ink: Color(hex: "#2d3a2a")
     )
 
     static let night = Palette(
-      paper: Color(hex: "#10150f"),
-      land: Color(hex: "#8ad44b").opacity(0.07),
-      coast: Color(hex: "#8ad44b").opacity(0.4),
-      grid: Color(hex: "#8ad44b").opacity(0.08),
-      road: Color(hex: "#a3ec06").opacity(0.8),
-      roadGlow: Color(hex: "#a3ec06").opacity(0.18),
-      marker: Color(hex: "#ffdd1e")
+      paper: Color(hex: "#0c1116"),
+      land: Color(hex: "#9fb6c4").opacity(0.06),
+      coast: Color(hex: "#8fa6b4").opacity(0.4),
+      grid: Color(hex: "#9fb6c4").opacity(0.06),
+      road: Color(hex: "#e8a33d").opacity(0.85),
+      roadGlow: Color(hex: "#e8a33d").opacity(0.14),
+      marker: Color(hex: "#e6edf2"),
+      ink: Color(hex: "#e6edf2")
     )
   }
 }
